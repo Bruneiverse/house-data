@@ -1,0 +1,11 @@
+---
+title: Plots and data summaries for manuscript
+author: Haziq Jamil
+grid:
+  sidebar-width: 0px
+---
+
+```{r}
+library(bruneimap)
+```
+

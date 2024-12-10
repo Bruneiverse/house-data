@@ -1,0 +1,15 @@
+{
+  "hash": "1e77be94993e91360025bc68922414a2",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: Plots and data summaries for manuscript\nauthor: Haziq Jamil\ngrid:\n  sidebar-width: 0px\n---\n\n::: {.cell}\n\n```{.r .cell-code .hidden}\nlibrary(bruneimap)\n```\n\n::: {.cell-output .cell-output-stderr .hidden}\n\n```\nLoading required package: sf\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr .hidden}\n\n```\nLinking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE\n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

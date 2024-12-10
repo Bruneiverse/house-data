@@ -1,0 +1,38 @@
+---
+title: House price data in Brunei
+authors:
+  - name: Haziq Jamil
+    orcid: 0000-0003-3298-1010
+    email: haziq.jamil@ubd.edu.bn
+    url: "https://haziqj.ml"
+    # note: 
+    # roles: writing
+    corresponding: true
+    affiliations:
+      - name: Universiti Brunei Darussalam
+        id: ubd
+        department: Mathematical Sciences, Faculty of Science
+        address: Universiti Brunei Darussalam, Jalan Tungku Link
+        city: Bandar Seri Begawan
+        country: Brunei
+        postal-code: BE 1410
+  - name: Hafeezul Waezz Rabu
+    affiliations:
+      - ref: ubd
+  - name: Amira Barizah Noorosmawie
+    affiliations:
+      - ref: ubd
+  - name: Lutfi Abdul Razak
+    affiliations:
+      - ref: ubd              
+date-modified: last-modified
+nocite: |
+  @*
+abstract: |
+  Abstract here.
+---
+
+## References {.unnumbered}
+
+:::{#refs}
+:::

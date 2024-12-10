@@ -1,21 +1,32 @@
 project:
   type: manuscript
-
+  output-dir: docs
+  
 manuscript:
-  article: index.qmd
+  article: manuscript.qmd
+  notebooks:
+    - 10-summary.qmd
 
 format:
-  html:
-    comments:
-      hypothesis: true
-  docx: default
-  jats: default
-
-  # (other formats)
-  # pdf: default
+  html: default
+  docx: 
+    reference-doc: data-in-brief-article-template.docx
+    output-file: jamil2025property
+  elsevier-pdf:
+    keep-tex: false    
+    output-file: jamil2025property
+    journal:
+      name: Data in Brief
 
 execute:
-  freeze: true
+  echo: false
+  cache: false
+  freeze: auto
+  warning: false
 
-
-
+editor_options: 
+  chunk_output_type: console
+  
+bibliography:
+  - refs-HJ.bib
+csl: data-in-brief.csl
