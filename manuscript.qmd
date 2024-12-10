@@ -32,6 +32,90 @@ abstract: |
   Abstract here.
 ---
 
+> Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain datasets with insufficient variables or samples.
+
+# Value of the Data
+
+This section states why these data are of value to the scientific community. Please provide between 3 and 6 bullet points and answer at least the questions below (delete the questions afterwards). Each bullet point should be a maximum of 150 words long, and should not include conclusions or inferences:
+
+- Why are these data valuable?
+- How can these data be reused by other researchers?
+- ...
+
+
+
+
+
+# Background
+
+Please describe your original motivation and context behind compiling this dataset. For example, briefly include information on the theoretical or methodological background against which you generated the data. Do not make concluding, interpretive, or otherwise inferential statements about the dataset. In case your data article is related to an original research article, please briefly describe how the data article adds value to the published article (Max. 200 words).
+
+# Data Description
+
+> This section describes your dataset. Refer to all the data folders, subfolders, and files in the repository individually, irrespective of whether they relate to raw or analyzed data, and make sure that the reader can follow the structure of your dataset.
+> Please use visual aids (such as tables, graphs, or figures with captions) to familiarize the reader with your dataset, but do not offer background, interpretations, or conclusions.
+
+To simplify matters, the dataset has been curated into a single `.csv` file.
+
+
+# Experimental Design, Materials and Methods
+
+> This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions. 
+> 
+> It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions.
+
+## Data sources
+
+1. Newspaper and magazine clippings
+  a. Physically archived newspapers (1993-20xx) available from The National Archive, Brunei.
+  b. Digitally archived newspapers available freely online.
+  c. Digitally archived magazines available freely online.
+
+2. Web scraping of online property agent listings
+
+TODO:
+- Describe the typical workflow. 
+- Describe the LLM data cleaning process.
+
+
+
+# Limitations
+
+> Describe any limitations related to the data described in this article. These could be any problems you faced during data collection or curation, limited quality or size of dataset, data biases, etc., but should not include limitations of analysis conducted or interpretation (Max. 200 words). If there are none, please write ‘None’ or ‘Not applicable’.
+
+- While effort has been made to ensure duplicate listings are removed, there is a slight possibility that some have slipped through the cracks.
+- Data coverage. Only popular advertisements listed... So not a lot in Temburong or Tutong.
+
+
+# Ethics
+
+> Data in Brief’s Guide for Authors contains detailed information on the ethical guidelines with which all authors must comply. In addition, we ask you to complete the relevant statement(s) below.  Please delete those which are not relevant for your data.
+> If your work involved human subjects, please include a statement here confirming that the relevant informed consent was obtained from those subjects, if the research was carried out in accordance with the Declaration of Helsinki, and if it includes the Ethical committee approval and the protocol number. A copy of the consent form (in English) can be submitted either in a data repository or under the section ‘Consent form’ while submitting the manuscript to the system.
+>
+> If your work involved animal experiments, please include a statement here confirming that those experiments complied with the ARRIVE guidelines and were carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines; EU Directive 2010/63/EU for animal experiments; or the National Institutes of Health guide for the care and use of laboratory animals (NIH Publications No. 8023, revised 1978). Note, the sex of the animals must be indicated, and, where appropriate, the influence (or association) of sex on the results of the study.
+> 
+> If your work involved data collected from social media platforms, please include a statement here confirming that a) informed consent was obtained from participants or that participant data has been fully anonymized, and b) the platform(s)’ data redistribution policies were complied with.
+> 
+> If none of the above, please include a statement confirming that the authors have read and follow the ethical requirements for publication in Data in Brief and confirming that the current work does not involve human subjects, animal experiments, or any data collected from social media platforms.
+
+# CRediT Author Statement
+
+https://www.elsevier.com/researcher/author/policies-and-guidelines/credit-author-statement 
+
+# Acknowledgements
+
+The authors gratefully acknowledge the contributions of Atikah Farhain Yahya, Nurulhanisah Abdul Manan, and Nina Zuhairi towards the collection and processing of the data contained within.
+
+<!-- In this section, mention all contributors who do not meet the criteria for authorship.  -->
+<!-- In addition, please list any funding sources in this section. List funding sources in the standard way to facilitate compliance to funder's requirements. -->
+<!-- If no funding has been provided for the research, please include the following sentence: -->
+<!-- This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors. -->
+
+# Declaration of Competing Interests
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+
 ## References {.unnumbered}
 
 :::{#refs}
