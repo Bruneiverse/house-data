@@ -57,10 +57,15 @@ Please describe your original motivation and context behind compiling this datas
 
 To simplify matters, the dataset has been curated into a single `.csv` file.
 
-:::{.column-page}
+:::{.content-visible when-format="html"}
 
+::: {.column-page }
 {{< embed analysis.qmd#tbl-summary >}}
+:::
+:::
 
+:::{.content-visible unless-format="html"}
+{{< embed analysis.qmd#tbl-summary >}}
 :::
 
 # Experimental Design, Materials and Methods
@@ -91,10 +96,14 @@ TODO:
 - Describe the typical workflow. 
 - Describe the LLM data cleaning process.
 
-:::{.column-page}
-
+:::{.content-visible when-format="html"}
+::: {.column-page }
 {{< embed analysis.qmd#tbl-avail >}}
+:::
+:::
 
+::: {.content-visible unless-format="html"}
+{{< embed analysis.qmd#tbl-avail >}}
 :::
 
 # Limitations

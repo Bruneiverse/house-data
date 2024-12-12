@@ -4,6 +4,13 @@ project:
   
 manuscript:
   article: manuscript.qmd
+  resources:
+    - data/rppi.csv
+  code-links:
+    - repo
+    - text: BDCB RPPI
+      icon: database
+      href: data/rppi.csv
 
 format:
   html: default

@@ -79,7 +79,11 @@ hsp |>
   ) |>
   add_overall() |>
   add_n() |>
-  modify_header(label ~ "**Variable**") 
+  modify_header(label ~ "**Variable**")
+  # as_gt() |>
+  # tab_options(
+  #   quarto.disable_processing = TRUE
+  # )
 ```
 
 ## Data availability by year
@@ -181,7 +185,8 @@ ggplot(hsp_mkm) +
     name = "Median\nprice"
   ) +
   ggrepel::geom_label_repel(
-    data = drop_na(hsp_mkm, price) |> mutate(mukim = gsub("Mukim ", "", mukim)),
+    data = drop_na(hsp_mkm, price) |> 
+      mutate(mukim = gsub("Mukim ", "", mukim)),
     aes(label = mukim, geometry = geometry),
     size = 2.7,
     stat = "sf_coordinates",
