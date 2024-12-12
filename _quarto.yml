@@ -4,8 +4,6 @@ project:
   
 manuscript:
   article: manuscript.qmd
-  notebooks:
-    - 10-summary.qmd
 
 format:
   html: default

@@ -1,0 +1,321 @@
+---
+title: Plots and data summaries for manuscript
+author: Haziq Jamil
+page-layout: full
+grid:
+  sidebar-width: 0px
+editor_options: 
+  chunk_output_type: console
+html-table-processing: none
+---
+
+
+```{r}
+library(tidyverse)
+library(bruneimap)
+library(gt)
+library(gtsummary)
+library(lubridate)
+hsp <- 
+  read_csv("data/hspbn_2024-12-12.csv") |>
+  mutate(
+    type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
+                                   "Apartment", "Land")),
+    tenure = factor(tenure, levels = c("Freehold", "Leasehold", "Strata")),
+    status = factor(status, levels = c("Proposed", "New", "Resale")),
+    date = as.Date(date, format = "%d/%m/%y"),
+    quarter = zoo::as.yearqtr(quarter)
+  )
+rppi <- 
+  read_csv("data/rppi.csv") |>
+  mutate(
+    quarter = zoo::as.yearqtr(quarter),
+    rppi = rppi / 100
+  )
+```
+
+## Glimpse
+
+```{r}
+glimpse(hsp)
+```
+
+## Summary of variables
+
+```{r}
+#| label: tbl-summary
+#| tbl-cap: Summary of housing data
+hsp |>
+  mutate(
+    price = price / 1000,
+    storeys = factor(
+      ifelse(storeys >= 3, "3+", as.character(storeys)),
+      levels = c("1", "2", "3+")
+    )
+  ) |>
+  tbl_summary(
+    include = c(price:baths),
+    by = district,
+    missing = "no", 
+    type = all_continuous() ~ "continuous2",
+    statistic = list(
+      all_continuous2() ~ c("{mean} ({sd})", Range = "{min} - {max}", "{median} ({p25}, {p75})")
+    ),
+    label = list(
+      price = "Price (BND 1,000)",
+      type = "Property type",
+      plot_area = "Plot area (acres)",
+      floor_area = "Floor area (sq. ft.)",
+      storeys = "Number of storeys",
+      status = "Development status",
+      tenure = "Land tenure",    
+      beds = "Number of bedrooms",
+      baths = "Number of bathrooms"
+    ),
+    digits = list(
+      baths = 1,
+      beds = 1
+    )
+  ) |>
+  add_overall() |>
+  add_n() |>
+  modify_header(label ~ "**Variable**") 
+```
+
+## Data availability by year
+
+```{r}
+#| label: tbl-avail
+#| tbl-cap: Data availability by year
+hsp |>
+  mutate(
+    year = year(date),
+    missing_price = is.na(price),
+    missing_type = is.na(type),
+    missing_tenure = is.na(tenure),
+    missing_status = is.na(status),
+    missing_plot_area = is.na(plot_area),
+    missing_floor_area = is.na(floor_area),
+    missing_storeys = is.na(storeys),
+    missing_beds = is.na(beds),
+    missing_baths = is.na(baths),
+    missing_housechar = missing_plot_area & missing_floor_area & missing_beds & missing_baths,
+    year = year(quarter),
+  ) |>
+  summarise(
+    count = n(),
+    spatial = length(unique(mukim)) / nrow(bruneimap::mkm_sf),
+    # price = sum(missing_price),
+    type = sum(missing_type),
+    house_char = sum(missing_housechar),
+    source = list(unique(method)),
+    .by = year
+  ) |>
+  mutate(
+    `nat-archive` = map_chr(source, ~ ifelse("nat-archive" %in% .x, "/", "")),
+    `online-archive` = map_chr(source, ~ ifelse("online-archive" %in% .x, "/", "")),
+    `web-scrape` = map_chr(source, ~ ifelse("web-scrape" %in% .x, "/", "")),
+    llm = map_chr(source, ~ ifelse("web-scrape-llm" %in% .x, "/", ""))
+  ) |> 
+  select(-source) |>
+  mutate(across(type:house_char, \(x) x / count)) |>
+  gt() |>
+  tab_spanner(
+    label = "Data source",
+    columns = `nat-archive`:`web-scrape`
+  ) |>
+  tab_spanner(
+    label = "Missing data severity",
+    columns = type:house_char
+  ) |>
+  fmt_percent(
+    spatial:house_char,
+    decimals = 1
+  ) |>
+  cols_label(
+    year ~ "Year",
+    count ~ "Count",
+    spatial ~ "Spatial coverage (mukim)",
+    type ~ "Property Type",
+    house_char ~ "Property Characteristics",
+    `nat-archive` ~ "National Archive",
+    `online-archive` ~ "Online Archive",
+    `web-scrape` ~ "Web Scraping",
+    llm ~ "LLM post-processing"
+  ) |>
+  tab_footnote(
+    footnote = paste0("Number of mukims in Brunei = ", nrow(bruneimap::mkm_sf), "."),
+    locations = cells_column_labels(columns = spatial)
+  ) |>
+  tab_footnote(
+    footnote = "Missing all of plot area, floor area, beds, and baths variables.",
+    locations = cells_column_labels(columns = house_char)
+  ) |>
+  tab_options(
+    quarto.disable_processing = TRUE
+  )
+```
+
+## Spatial distribution
+
+```{r}
+#| label: fig-spatial
+#| fig-cap: Spatial distribution of median property prices by mukim.
+#| message: false
+#| warning: false
+hsp_mkm <-
+  hsp |>
+  summarise(
+    price = median(price, na.rm = TRUE, trim = 0.05),
+    .by = mukim
+  ) |>
+  left_join(x = bruneimap::mkm_sf) 
+
+ggplot(hsp_mkm) +
+  geom_sf(aes(fill = price), col = "gray50", linewidth = 0.5) +
+  scale_fill_viridis_c(
+    option = "cividis",
+    na.value = "transparent",
+    labels = scales::dollar,
+    trans = scales::pseudo_log_trans(sigma = 0.001),
+    name = "Median\nprice"
+  ) +
+  ggrepel::geom_label_repel(
+    data = drop_na(hsp_mkm, price) |> mutate(mukim = gsub("Mukim ", "", mukim)),
+    aes(label = mukim, geometry = geometry),
+    size = 2.7,
+    stat = "sf_coordinates",
+    max.overlaps = Inf,
+    min.segment.length = 0,       # Allow longer segments
+    segment.size = 0.3,           # Adjust the thickness of lines
+    segment.curvature = 0.1,      # Add curvature if needed
+    force = 5                     # Increase force to spread labels
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_bw()
+```
+
+## Price evolution
+
+```{r}
+#| label: fig-price-evolution
+#| fig-cap: "Median smoothed prices per square foot by property type using a 12-month rolling window."
+#| message: false
+#| out-width: 100%
+#| fig-height: 5
+#| fig-width: 9
+hsp_noland <- filter(hsp, type != "Land")
+hsp_all <- hsp_noland
+hsp_all$type <- "Overall"
+hsp_sld <- 
+  bind_rows(hsp_noland, hsp_all) |> 
+  arrange(date) |> 
+  drop_na(type) |>
+  mutate(
+    # date = case_when(
+    #   year(date) <= 2002 ~ zoo::as.Date(quarter),
+    #   TRUE ~ date
+    # ),
+    price_per_sqft = price / floor_area
+  ) |>
+  filter(price_per_sqft < 350)
+
+slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
+    df |>
+    drop_na(type) |>
+      summarise(
+        date = min(date), 
+        price = median(price, na.rm = TRUE),
+        plot_area = median(plot_area, na.rm = TRUE),
+        floor_area = median(floor_area, na.rm = TRUE),
+        .by = type
+      )
+  }, .before = 6, .after = 6) |>
+  distinct(date, type, .keep_all = TRUE) |>
+  mutate(
+    price_per_sqft = price / floor_area,
+    type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
+                                   "Apartment", "Overall")) 
+  ) |>  ggplot(aes(x = date, y = price_per_sqft, col = type)) +
+  geom_line(aes(linewidth = type)) +
+  scale_x_date(
+    breaks = scales::breaks_width("1 year"), 
+    labels = scales::label_date("%Y"),
+    name = NULL
+  ) +
+  scale_y_continuous(
+    labels = scales::dollar,
+    name = "Price per square foot (BND)"
+  ) +
+  scale_colour_manual(values = c(RColorBrewer::brewer.pal(4, "Set1"), "black")) +
+  scale_linewidth_manual(values = c(rep(0.6, 4), 1.2)) +
+  labs(
+    col = NULL,
+    linewidth = NULL
+    # caption = "Median smoothed prices using a 12-month rolling window."
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "top"
+  ) 
+```
+
+
+## RPPI Comparison
+
+```{r}
+#| label: fig-rppi
+#| fig-cap: "Comparison of quarterly median price per square foot indices (Median PPSF) and the official Residential Property Price Index (RPPI) from Brunei Darussalam Central Bank (BDCB)."
+#| message: false
+#| out-width: 100%
+#| fig-height: 5
+#| fig-width: 9
+hsp_rppi <- filter(hsp_sld, type == "Overall")
+
+slider::slide_period_dfr(hsp_rppi, hsp_rppi$date, "month", \(df) {
+    df |>
+    drop_na(type) |>
+      summarise(
+        quarter = min(quarter), 
+        price = median(price, na.rm = TRUE),
+        plot_area = median(plot_area, na.rm = TRUE),
+        floor_area = median(floor_area, na.rm = TRUE)
+      )
+  }, .before = 1, .after = 1) |>
+  summarise(across(price:floor_area, median), .by = quarter) |>
+  mutate(
+    price_per_sqft = price / floor_area,
+    index = price_per_sqft / price_per_sqft[quarter == "2015 Q1"],
+  ) |>
+  right_join(rppi) |>
+  pivot_longer(c(index, rppi), names_to = "series", values_to = "value") |>
+  # mutate(series = factor(series, labels = c("PPS", "RPPI (BDCB)"))) |>
+  ggplot(aes(x = quarter, y = value, col = series)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_line(linewidth = 0.8) +
+  scale_colour_brewer(palette = "Set1") +
+  scale_y_continuous(labels = scales::percent, name = "Index") +
+  zoo::scale_x_yearqtr(
+    format = "%Y-Q%q", name = NULL, #expand = c(0, 0),
+    breaks = seq(2015, 2024.5, by = 0.25)
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
+  geom_text(
+    data = tibble(
+      quarter = c(2024.25, 2024.25),
+      series = c("index", "rppi"),
+      value = c(0.935, 0.955),
+      label = c("Median PPSF", "RPPI (BDCB)")
+    ),
+    aes(label = label),
+    hjust = 0
+  ) +
+  # directlabels::geom_dl(aes(label = series), method = "last.points") +
+  coord_cartesian(xlim = c(2015, 2025))
+```
+

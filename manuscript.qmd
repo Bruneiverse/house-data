@@ -16,10 +16,10 @@ authors:
         city: Bandar Seri Begawan
         country: Brunei
         postal-code: BE 1410
-  - name: Hafeezul Waezz Rabu
-    affiliations:
-      - ref: ubd
   - name: Amira Barizah Noorosmawie
+    affiliations:
+      - ref: ubd        
+  - name: Hafeezul Waezz Rabu
     affiliations:
       - ref: ubd
   - name: Lutfi Abdul Razak
@@ -57,12 +57,25 @@ Please describe your original motivation and context behind compiling this datas
 
 To simplify matters, the dataset has been curated into a single `.csv` file.
 
+:::{.column-page}
+
+{{< embed analysis.qmd#tbl-summary >}}
+
+:::
 
 # Experimental Design, Materials and Methods
 
 > This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions. 
 > 
 > It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions.
+
+
+
+{{< embed analysis.qmd#fig-spatial >}}
+
+{{< embed analysis.qmd#fig-price-evolution >}}
+
+{{< embed analysis.qmd#fig-rppi >}}
 
 ## Data sources
 
@@ -74,10 +87,15 @@ To simplify matters, the dataset has been curated into a single `.csv` file.
 2. Web scraping of online property agent listings
 
 TODO:
+
 - Describe the typical workflow. 
 - Describe the LLM data cleaning process.
 
+:::{.column-page}
 
+{{< embed analysis.qmd#tbl-avail >}}
+
+:::
 
 # Limitations
 
