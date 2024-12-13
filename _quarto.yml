@@ -1,6 +1,8 @@
 project:
   type: manuscript
   output-dir: docs
+  post-render:
+    - _cleanup.R
   
 manuscript:
   article: manuscript.qmd
@@ -22,10 +24,12 @@ format:
     output-file: jamil2025property
     journal:
       name: Data in Brief
+    header-includes:
+      - \usepackage[a4paper, margin=1in]{geometry}
 
 execute:
-  echo: false
-  cache: false
+  # echo: false
+  cache: true
   freeze: auto
   warning: false
 

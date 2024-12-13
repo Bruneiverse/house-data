@@ -5,8 +5,6 @@ authors:
     orcid: 0000-0003-3298-1010
     email: haziq.jamil@ubd.edu.bn
     url: "https://haziqj.ml"
-    # note: 
-    # roles: writing
     corresponding: true
     affiliations:
       - name: Universiti Brunei Darussalam
@@ -23,6 +21,8 @@ authors:
     affiliations:
       - ref: ubd
   - name: Lutfi Abdul Razak
+    orcid: 0000-0003-1681-0895
+    email: lutfi.razak@ubd.edu.bn
     affiliations:
       - ref: ubd              
 date-modified: last-modified
@@ -67,6 +67,9 @@ To simplify matters, the dataset has been curated into a single `.csv` file.
 :::{.content-visible unless-format="html"}
 {{< embed analysis.qmd#tbl-summary >}}
 :::
+
+{{< embed analysis.qmd#fig-corr >}}
+
 
 # Experimental Design, Materials and Methods
 

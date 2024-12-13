@@ -11,11 +11,15 @@ html-table-processing: none
 
 
 ```{r}
+## ----- Libraries -------------------------------------------------------------
 library(tidyverse)
 library(bruneimap)
 library(gt)
 library(gtsummary)
 library(lubridate)
+library(GGally)
+
+## ----- Load data sets --------------------------------------------------------
 hsp <- 
   read_csv("data/hspbn_2024-12-12.csv") |>
   mutate(
@@ -86,6 +90,53 @@ hsp |>
   # )
 ```
 
+## Correlations
+
+```{r}
+#| label: fig-corr
+#| fig-cap: Pairwise correlation plot of continuous variables.
+#| warning: false
+#| message: false
+#| fig-width: 7.5
+#| fig-height: 7.5
+#| out-width: 100%
+
+my_fn <- function(data, mapping, method = "lm", ...) {
+  ggplot(data = data, mapping = mapping) + 
+    geom_point(alpha = 0.5) + 
+    geom_smooth(method = method, formula = y ~ x, se = FALSE,
+                col = RColorBrewer::brewer.pal(3, "Set1")[2], ...)
+  }
+
+pm <-
+  hsp |>
+  mutate(
+    logprice = log(price),
+    price = price / 1000
+  ) |>
+  select(
+    `Plot area` = plot_area,
+    `Floor area` = floor_area,
+    Beds = beds,
+    Baths = baths,
+    `Price (BND 1,000)` = price,
+    `Log Price` = logprice
+  ) |>
+  ggpairs(
+    progress = FALSE,
+    lower = list(continuous = my_fn)
+  ) +
+  theme_bw() +
+  scale_x_continuous(labels = scales::number) +
+  scale_y_continuous(labels = scales::number) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+pm[6,5] <- pm[5, 6] <- NULL
+pm
+```
+
+
 ## Data availability by year
 
 ```{r}
@@ -116,14 +167,18 @@ hsp |>
     .by = year
   ) |>
   mutate(
-    `nat-archive` = map_chr(source, ~ ifelse("nat-archive" %in% .x, "/", "")),
-    `online-archive` = map_chr(source, ~ ifelse("online-archive" %in% .x, "/", "")),
-    `web-scrape` = map_chr(source, ~ ifelse("web-scrape" %in% .x, "/", "")),
-    llm = map_chr(source, ~ ifelse("web-scrape-llm" %in% .x, "/", ""))
+    `nat-archive` = map_chr(source, ~ ifelse("nat-archive" %in% .x, "✔", "")),
+    `online-archive` = map_chr(source, ~ ifelse("online-archive" %in% .x, "✔", "")),
+    `web-scrape` = map_chr(source, ~ ifelse("web-scrape" %in% .x, "✔", "")),
+    llm = map_chr(source, ~ ifelse("web-scrape-llm" %in% .x, "✔", ""))
   ) |> 
   select(-source) |>
   mutate(across(type:house_char, \(x) x / count)) |>
-  gt() |>
+  gt(rowname_col = "year") |>
+  cols_align(
+    align = "center",
+    columns = `nat-archive`:llm
+  ) |>
   tab_spanner(
     label = "Data source",
     columns = `nat-archive`:`web-scrape`
@@ -147,17 +202,30 @@ hsp |>
     `web-scrape` ~ "Web Scraping",
     llm ~ "LLM post-processing"
   ) |>
+  grand_summary_rows(
+    columns = count:house_char,
+    fns = list(Mean = "mean"),
+    fmt = list(
+      ~ fmt_number(., decimals = 0, columns = "count"),
+      ~ fmt_percent(., decimals = 1, columns = c("spatial", "type", "house_char"))
+    )
+  ) |>
   tab_footnote(
-    footnote = paste0("Number of mukims in Brunei = ", nrow(bruneimap::mkm_sf), "."),
+    footnote = paste0("Total number of mukims in Brunei = ", nrow(bruneimap::mkm_sf), "."),
     locations = cells_column_labels(columns = spatial)
+  ) |>
+  tab_footnote(
+    footnote = "Unknown property type.",
+    locations = cells_column_labels(columns = type)
   ) |>
   tab_footnote(
     footnote = "Missing all of plot area, floor area, beds, and baths variables.",
     locations = cells_column_labels(columns = house_char)
   ) |>
   tab_options(
-    quarto.disable_processing = TRUE
-  )
+    quarto.disable_processing = TRUE,
+    grand_summary_row.text_transform = "capitalize"
+  ) 
 ```
 
 ## Spatial distribution
@@ -204,26 +272,19 @@ ggplot(hsp_mkm) +
 
 ```{r}
 #| label: fig-price-evolution
-#| fig-cap: "Median smoothed prices per square foot by property type using a 12-month rolling window."
+#| fig-cap: "Median smoothed prices per square foot by property type using a 24-month (8-quarter) rolling window."
 #| message: false
 #| out-width: 100%
 #| fig-height: 5
 #| fig-width: 9
-hsp_noland <- filter(hsp, type != "Land")
+hsp_noland <- 
+  filter(hsp, type != "Land") |>
+  drop_na(type)
 hsp_all <- hsp_noland
 hsp_all$type <- "Overall"
 hsp_sld <- 
   bind_rows(hsp_noland, hsp_all) |> 
-  arrange(date) |> 
-  drop_na(type) |>
-  mutate(
-    # date = case_when(
-    #   year(date) <= 2002 ~ zoo::as.Date(quarter),
-    #   TRUE ~ date
-    # ),
-    price_per_sqft = price / floor_area
-  ) |>
-  filter(price_per_sqft < 350)
+  arrange(date) 
 
 slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
     df |>
@@ -235,13 +296,14 @@ slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
         floor_area = median(floor_area, na.rm = TRUE),
         .by = type
       )
-  }, .before = 6, .after = 6) |>
+  }, .before = 18, .after = 6) |>
   distinct(date, type, .keep_all = TRUE) |>
   mutate(
     price_per_sqft = price / floor_area,
     type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
                                    "Apartment", "Overall")) 
-  ) |>  ggplot(aes(x = date, y = price_per_sqft, col = type)) +
+  ) |>
+  ggplot(aes(x = date, y = price_per_sqft, col = type)) +
   geom_line(aes(linewidth = type)) +
   scale_x_date(
     breaks = scales::breaks_width("1 year"), 
@@ -276,24 +338,25 @@ slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
 #| out-width: 100%
 #| fig-height: 5
 #| fig-width: 9
-hsp_rppi <- filter(hsp_sld, type == "Overall")
+hsp_rppi <- hsp_noland |>
+  drop_na(floor_area)
 
 slider::slide_period_dfr(hsp_rppi, hsp_rppi$date, "month", \(df) {
     df |>
     drop_na(type) |>
       summarise(
-        quarter = min(quarter), 
+        quarter = min(quarter),
         price = median(price, na.rm = TRUE),
         plot_area = median(plot_area, na.rm = TRUE),
         floor_area = median(floor_area, na.rm = TRUE)
       )
-  }, .before = 1, .after = 1) |>
-  summarise(across(price:floor_area, median), .by = quarter) |>
+  }, .before = 1, .after = 1) |> 
+  summarise(across(price:floor_area, \(x) median(x, na.rm = TRUE)), .by = quarter) |>
   mutate(
     price_per_sqft = price / floor_area,
     index = price_per_sqft / price_per_sqft[quarter == "2015 Q1"],
-  ) |>
-  right_join(rppi) |>
+  ) |> 
+  right_join(rppi) |>  
   pivot_longer(c(index, rppi), names_to = "series", values_to = "value") |>
   # mutate(series = factor(series, labels = c("PPS", "RPPI (BDCB)"))) |>
   ggplot(aes(x = quarter, y = value, col = series)) +
@@ -312,9 +375,9 @@ slider::slide_period_dfr(hsp_rppi, hsp_rppi$date, "month", \(df) {
   ) +
   geom_text(
     data = tibble(
-      quarter = c(2024.25, 2024.25),
+      quarter = c(2024.3, 2024.3),
       series = c("index", "rppi"),
-      value = c(0.935, 0.955),
+      value = c(0.941, 0.955),
       label = c("Median PPSF", "RPPI (BDCB)")
     ),
     aes(label = label),
