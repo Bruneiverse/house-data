@@ -153,13 +153,10 @@ This aggregation helps address potential issues like missing data (see section b
 
 The dataset contains missing values across various property characteristics including type, tenure, status, plot area, floor area, storeys, beds, and baths.
 This is due to the nature of the property listings, which may not always include complete information when advertised.
+It is noted, however, that there are no missing values for price and spatial information.
 Missing values are represented by blank cells in the CSV file.
 The severity of missing values is summarised in @tbl-avail.
-Users of our dataset may wish to treat missing values in different ways depending on their research objectives.
-
-
-
-
+In summary, 10.5% of the records contain missing values for all key house characteristics (i.e. plot area, floor area, beds, and baths), which, depending on the research question, may necessitate imputation or exclusion of these records.
 
 # Experimental Design, Materials and Methods
 
@@ -169,7 +166,6 @@ Users of our dataset may wish to treat missing values in different ways dependin
 
 
 
-<!-- {{< embed analysis.qmd#fig-rppi >}} -->
 
 
 {{< embed analysis.qmd#tbl-avail >}}
@@ -177,13 +173,23 @@ Users of our dataset may wish to treat missing values in different ways dependin
 
 ## Manual Data Collection
 
-1. Newspaper and magazine clippings
-  a. Physically archived newspapers (1993-20xx) available from The National Archive, Brunei.
-  b. Digitally archived newspapers available freely online.
-  c. Digitally archived magazines available freely online.
+Early years data collection was conducted manually, involving the transcription of property listing details from advertisements into a digital tabular format. 
+This process was carried out by two of the authors over a period of nine months, from October 2023 to July 2024. 
+The primary sources of the property listings were local newspapers and magazines. 
+Physical copies were accessed through the National Archive of Brunei Darussalam, while digital versions, which are digitized replicas of the physical newspapers, were obtained online. 
+These digital formats could not be scraped due to their lack of structured data, necessitating manual transcription.
+
+Daily newspapers from 1993 onward were available at the National Archive.
+However, reviewing every single daily edition was not practical and would increase the likelihood of recording duplicate listings, thus necessating a sampling strategy.
+The sampling was done as follows.
+Three newspaper edition per week was selected at random, and the classifieds section was reviewed for property listings. 
+When a listing was found, it was recorded after careful filtering to ensure it was unique. 
+This manual filtering process involved cross-checking based on the real estate agent, house characteristics, price, location, and date proximity. 
+To avoid duplication, the same house listing was typically not recorded more than once within a quarter. 
+This strategy aimed to achieve a target quota of 300–500 unique listings per year.
 
 
-## Automated Web Scraping
+## Web Scraping
 
 Web scraping of online property agent listings
 
@@ -193,7 +199,12 @@ A test on 329 randomly selected data points found that 306 were "correct" (93.0%
 
 ## Spatial Data Harmonisation
 
+## Comparison with RPPI
 
+
+
+
+{{< embed analysis.qmd#fig-rppi >}}
 
 
 # Limitations
