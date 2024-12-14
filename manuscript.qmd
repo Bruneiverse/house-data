@@ -26,8 +26,6 @@ authors:
     affiliations:
       - ref: ubd              
 date-modified: last-modified
-nocite: |
-  @*
 abstract: |
   Abstract here.
 engine: knitr
@@ -39,30 +37,81 @@ engine: knitr
 #| file: data.R
 ```
 
-> Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain datasets with insufficient variables or samples.
+<!-- > Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain datasets with insufficient variables or samples. -->
 
 # Value of the Data
 
-This section states why these data are of value to the scientific community. Please provide between 3 and 6 bullet points and answer at least the questions below (delete the questions afterwards). Each bullet point should be a maximum of 150 words long, and should not include conclusions or inferences:
+<!-- This section states why these data are of value to the scientific community. Please provide between 3 and 6 bullet points and answer at least the questions below (delete the questions afterwards). Each bullet point should be a maximum of 150 words long, and should not include conclusions or inferences: -->
 
-- Why are these data valuable?
-- How can these data be reused by other researchers?
-- ...
+<!-- - Why are these data valuable? -->
+<!-- - How can these data be reused by other researchers? -->
+<!-- - ... -->
 
-
-
-
+- {{< lipsum 1 >}}
+- {{< lipsum 1 >}}
+- {{< lipsum 1 >}}
 
 # Background
 
-Please describe your original motivation and context behind compiling this dataset. For example, briefly include information on the theoretical or methodological background against which you generated the data. Do not make concluding, interpretive, or otherwise inferential statements about the dataset. In case your data article is related to an original research article, please briefly describe how the data article adds value to the published article (Max. 200 words).
+<!-- Please describe your original motivation and context behind compiling this dataset. For example, briefly include information on the theoretical or methodological background against which you generated the data. Do not make concluding, interpretive, or otherwise inferential statements about the dataset. In case your data article is related to an original research article, please briefly describe how the data article adds value to the published article (Max. 200 words). -->
+
+The housing market is a key indicator of economic health and social well-being, yet comprehensive and publicly accessible datasets in Brunei remain limited. To our knowledge, this is the first dataset of its kind in Brunei, motivated by the need to fill the gap in publicly available data on the local housing market.
+
+Currently, the Brunei Darussalam Central Bank (BDCB) produces a Residential Property Price Index (RPPI) using data sourced from financial institutions, such as bank loan datasets. While the RPPI is published quarterly, the underlying raw data is not publicly available due to privacy restrictions. This limits research opportunities and transparency in understanding broader housing market trends. Furthermore, the RPPI only began in 2015, leaving a significant gap in historical housing data.
+
+Our dataset addresses these challenges by providing a cost-effective and timely means to collect and analyze housing market data. Covering records from 1993 onward, it offers historical depth that complements and extends beyond the RPPI. It is valuable not only for tracking property price trends but also for advancing research in economics, urban planning, and real estate, supporting informed decision-making across sectors.
+
 
 # Data Description
 
-> This section describes your dataset. Refer to all the data folders, subfolders, and files in the repository individually, irrespective of whether they relate to raw or analyzed data, and make sure that the reader can follow the structure of your dataset.
-> Please use visual aids (such as tables, graphs, or figures with captions) to familiarize the reader with your dataset, but do not offer background, interpretations, or conclusions.
+<!-- > This section describes your dataset. Refer to all the data folders, subfolders, and files in the repository individually, irrespective of whether they relate to raw or analyzed data, and make sure that the reader can follow the structure of your dataset. -->
+<!-- > Please use visual aids (such as tables, graphs, or figures with captions) to familiarize the reader with your dataset, but do not offer background, interpretations, or conclusions. -->
 
-To simplify matters, the dataset has been curated into a single `.csv` file.
+```{r}
+#| include: false
+years <- lubridate::year(hsp$date)
+max(years) - min(years) + 1
+
+```
+
+
+The data has been curated into a single Comma-Separated Values (CSV) file named `hspbn_2024-12-12.csv`. 
+The dataset contains `{r} scales::comma(nrow(hsp))` property listing records which are enriched with area-level geotagged spatial information, spanning a period of `{r} max(years) - min(years) + 1` years from `{r} format(min(hsp$date), "%b %Y")` to `{r} format(max(hsp$date), "%b %Y")`.
+The `{r} scales::comma(ncol(hsp))` columns of this dataset capture information for each property listing as detailed in @tbl-codebook below.
+
+```{r}
+#| label: tbl-codebook
+#| tbl-cap: Codebook for the house price dataset.
+readxl::read_xlsx("data/codebook.xlsx") |>
+  rownames_to_column("No.") |>
+  gt(rowname_col = "No.") |>
+  fmt_markdown("Variable")
+```
+
+## Property Characteristics
+
+The dataset includes a range of property characteristics suitable for exploring the relationship between property attributes and prices.
+This section clarifies and provides context for the key variables in the dataset.
+
+Brunei’s private residential property market offers a variety of options, including detached houses, townhouses, and apartments [@hassan2023sociocultural].
+Based on this, property types have been categorised into four main groups --
+Detached, Semi-Detached, Terrace, and Apartment -- to accurately reflect the diversity of property types in Brunei.
+Additionally, there are a small number of records that reflect land sales, which are categorised accordingly as "Land".
+
+Property tenure refers to the legal terms under which a person holds ownership or occupancy rights to a property. 
+In Brunei, property tenure can be classified into three main categories: 
+Freehold (in perpetuity), Leasehold, and Strata.
+The latter of which refers to a form of ownership where individuals own a portion of a property, such as an apartment, and share ownership of common areas.
+
+The dataset also includes information on the status of the property listing, indicating whether the advertisement refers to a proposed development, a newly completed development, or a property being resold. This categorical variable may be useful for analyzing price differences across different types of listings.
+
+The numerical variables in the dataset are plot area, floor area, storeys, beds, and baths, each providing information on the physical attributes of the property. 
+Note that plot area is measured in acres, while floor area is in square feet, as these are the common units of measurement used in Brunei. 
+Users of this dataset may choose to convert these units as needed for their analysis.
+
+Finally, metadata about the property is included for transparency and informational purposes. 
+The variable agent specifies the (anonymised) identifier of the real estate agent or agency responsible for the listing, while source identifies the platform or medium from which the listing was obtained, such as a newspaper, magazine, or website. 
+The method variable details the data collection approach, which is further elaborated in the section below.
 
 ::: {.content-visible when-format="html"}
 ::: {.column-page}
@@ -74,53 +123,86 @@ To simplify matters, the dataset has been curated into a single `.csv` file.
 {{< embed analysis.qmd#tbl-summary >}}
 :::
 
-{{< embed analysis.qmd#fig-corr >}}
+<!-- {{< embed analysis.qmd#fig-corr >}} -->
 
-# Experimental Design, Materials and Methods
+## Spatial Information
 
-> This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions. 
-> 
-> It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions.
+In Brunei Darussalam, the administrative areas are organised hierarchically into three levels.
+At the smallest level is the *kampong*, which refers to a village or neighbourhood.
+Several kampongs grouped together form a *mukim*, which serves as a sub-district administrative area.
+Finally, multiple mukims are nested within a *district*, the largest administrative unit, of which Brunei has four: Brunei-Muara, Belait, Tutong, and Temburong.
+In our dataset, each property listing is associated with a specific kampong, mukim, and district, allowing for spatial analysis at different scales.
+
+Importantly, the names of the kampongs, mukims, and districts have been harmonised with a standardised naming convention to ensure consistency across the dataset.
+This also allows for ease of integration into Geographic Information Systems (GIS) software for spatial analysis and visualisation, namely the `{bruneimap}` R package [@jamil2024bruneimap].
 
 {{< embed analysis.qmd#fig-spatial >}}
 
+## Listing Dates
+
+The date variable in the dataset refers to the date on which the property listing was obtained. 
+It is important to note that this is not the date the property was sold, nor does it necessarily reflect the precise timing of other transactions related to the property. 
+Users should set their expectations accordingly, as the primary purpose of the date is to capture the state of the housing market at a specific point in time.
+
+For analysis, we recommend aggregating data by quarters, as represented by the quarter variable. 
+This aggregation helps address potential issues like missing data (see section below) and provides a more stable and robust representation of market trends, making it suitable for temporal analysis of the housing market.
+
 {{< embed analysis.qmd#fig-price-evolution >}}
 
-{{< embed analysis.qmd#fig-rppi >}}
+## Missing Values
 
-## Data sources
+The dataset contains missing values across various property characteristics including type, tenure, status, plot area, floor area, storeys, beds, and baths.
+This is due to the nature of the property listings, which may not always include complete information when advertised.
+Missing values are represented by blank cells in the CSV file.
+The severity of missing values is summarised in @tbl-avail.
+Users of our dataset may wish to treat missing values in different ways depending on their research objectives.
+
+
+
+
+
+# Experimental Design, Materials and Methods
+
+<!-- > This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions.  -->
+<!-- >  -->
+<!-- > It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions. -->
+
+
+
+<!-- {{< embed analysis.qmd#fig-rppi >}} -->
+
+
+{{< embed analysis.qmd#tbl-avail >}}
+
+
+## Manual Data Collection
 
 1. Newspaper and magazine clippings
   a. Physically archived newspapers (1993-20xx) available from The National Archive, Brunei.
   b. Digitally archived newspapers available freely online.
   c. Digitally archived magazines available freely online.
 
-2. Web scraping of online property agent listings
 
-TODO:
+## Automated Web Scraping
 
-- Describe the typical workflow. 
-- Describe the LLM data cleaning process.
+Web scraping of online property agent listings
 
-::: {.content-visible when-format="html"}
-::: {.column-page}
-{{< embed analysis.qmd#tbl-avail >}}
-:::
-:::
+## LLM Data Cleaning
 
-::: {.content-visible unless-format="html"}
-{{< embed analysis.qmd#tbl-avail >}}
-:::
+A test on 329 randomly selected data points found that 306 were "correct" (93.0% accuracy), i.e. usable in the sense that either the details were extracted correctly or correctly identified "non listings".
+
+## Spatial Data Harmonisation
+
 
 
 
 # Limitations
 
-> Describe any limitations related to the data described in this article. These could be any problems you faced during data collection or curation, limited quality or size of dataset, data biases, etc., but should not include limitations of analysis conducted or interpretation (Max. 200 words). If there are none, please write ‘None’ or ‘Not applicable’.
+<!-- > Describe any limitations related to the data described in this article. These could be any problems you faced during data collection or curation, limited quality or size of dataset, data biases, etc., but should not include limitations of analysis conducted or interpretation (Max. 200 words). If there are none, please write ‘None’ or ‘Not applicable’. -->
 
 - While effort has been made to ensure duplicate listings are removed, there is a slight possibility that some have slipped through the cracks.
 - Data coverage. Only popular advertisements listed... So not a lot in Temburong or Tutong.
-
+- Missing data.
 
 # Ethics
 
@@ -151,7 +233,7 @@ The authors gratefully acknowledge the contributions of Atikah Farhain Yahya, Nu
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 
-## References {.unnumbered}
+# References {.unnumbered}
 
 :::{#refs}
 :::

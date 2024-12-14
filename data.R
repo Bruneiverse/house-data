@@ -5,9 +5,6 @@ library(gtsummary)
 library(lubridate)
 library(GGally)
 
-## -----------------------------------------------------------------------------
-#| label: data
-
 # Main data set
 hsp <- 
   read_csv("data/hspbn_2024-12-12.csv") |>

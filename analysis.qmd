@@ -21,7 +21,7 @@ html-table-processing: none
 
 ```{r}
 #| label: tbl-summary
-#| tbl-cap: Summary of housing data
+#| tbl-cap: Summary of housing data.
 hsp |>
   mutate(
     price = price / 1000,
@@ -110,7 +110,7 @@ pm
 
 ```{r}
 #| label: tbl-avail
-#| tbl-cap: Data availability by year
+#| tbl-cap: Data availability by year.
 hsp |>
   mutate(
     year = year(date),
@@ -233,7 +233,7 @@ ggplot(hsp_mkm) +
 
 ```{r}
 #| label: fig-price-evolution
-#| fig-cap: "Median smoothed prices per square foot by property type using a 24-month (8-quarter) rolling window."
+#| fig-cap: Median smoothed prices per square foot by property type using a 24-month (8-quarter) rolling window.
 #| message: false
 #| out-width: 100%
 #| fig-height: 5
@@ -284,7 +284,7 @@ slider::slide_period_dfr(hsp_all, hsp_all$date, "month", \(df) {
 
 ```{r}
 #| label: fig-rppi
-#| fig-cap: "Comparison of quarterly median price per square foot indices (Median PPSF) and the official Residential Property Price Index (RPPI) from Brunei Darussalam Central Bank (BDCB)."
+#| fig-cap: Comparison of quarterly median price per square foot indices (Median PPSF) and the official Residential Property Price Index (RPPI) from Brunei Darussalam Central Bank (BDCB).
 #| message: false
 #| out-width: 100%
 #| fig-height: 5
