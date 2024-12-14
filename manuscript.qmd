@@ -30,7 +30,14 @@ nocite: |
   @*
 abstract: |
   Abstract here.
+engine: knitr
 ---
+
+```{r}
+#| echo: false
+#| eval: true 
+#| file: data.R
+```
 
 > Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain datasets with insufficient variables or samples.
 
@@ -57,27 +64,23 @@ Please describe your original motivation and context behind compiling this datas
 
 To simplify matters, the dataset has been curated into a single `.csv` file.
 
-:::{.content-visible when-format="html"}
-
-::: {.column-page }
+::: {.content-visible when-format="html"}
+::: {.column-page}
 {{< embed analysis.qmd#tbl-summary >}}
 :::
 :::
 
-:::{.content-visible unless-format="html"}
+::: {.content-visible unless-format="html"}
 {{< embed analysis.qmd#tbl-summary >}}
 :::
 
 {{< embed analysis.qmd#fig-corr >}}
-
 
 # Experimental Design, Materials and Methods
 
 > This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions. 
 > 
 > It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions.
-
-
 
 {{< embed analysis.qmd#fig-spatial >}}
 
@@ -99,8 +102,8 @@ TODO:
 - Describe the typical workflow. 
 - Describe the LLM data cleaning process.
 
-:::{.content-visible when-format="html"}
-::: {.column-page }
+::: {.content-visible when-format="html"}
+::: {.column-page}
 {{< embed analysis.qmd#tbl-avail >}}
 :::
 :::
@@ -108,6 +111,8 @@ TODO:
 ::: {.content-visible unless-format="html"}
 {{< embed analysis.qmd#tbl-avail >}}
 :::
+
+
 
 # Limitations
 

@@ -10,3 +10,27 @@ for (file in files_to_remove) {
     cat("File not found:", file, "\n")
   }
 }
+
+# Fix the alignment of tfoot in the Quarto-generated HTML
+
+# Path to the HTML file
+html_file <- "docs/index.html"
+
+# Check if the file exists
+if (file.exists(html_file)) {
+  # Read the file content
+  html_content <- readLines(html_file)
+  
+  # Locate the line with <tfoot class="gt_footnotes">
+  html_content <- gsub(
+    pattern = '<tfoot class="gt_footnotes">',
+    replacement = '<tfoot class="gt_footnotes" style="text-align: left;">',
+    x = html_content
+  )
+  
+  # Write the updated content back to the file
+  writeLines(html_content, html_file)
+  cat("Updated text alignment in:", html_file, "\n")
+} else {
+  cat("File not found:", html_file, "\n")
+}

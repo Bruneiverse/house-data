@@ -9,39 +9,12 @@ editor_options:
 html-table-processing: none
 ---
 
+## Load data 
 
 ```{r}
-## ----- Libraries -------------------------------------------------------------
-library(tidyverse)
-library(bruneimap)
-library(gt)
-library(gtsummary)
-library(lubridate)
-library(GGally)
-
-## ----- Load data sets --------------------------------------------------------
-hsp <- 
-  read_csv("data/hspbn_2024-12-12.csv") |>
-  mutate(
-    type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
-                                   "Apartment", "Land")),
-    tenure = factor(tenure, levels = c("Freehold", "Leasehold", "Strata")),
-    status = factor(status, levels = c("Proposed", "New", "Resale")),
-    date = as.Date(date, format = "%d/%m/%y"),
-    quarter = zoo::as.yearqtr(quarter)
-  )
-rppi <- 
-  read_csv("data/rppi.csv") |>
-  mutate(
-    quarter = zoo::as.yearqtr(quarter),
-    rppi = rppi / 100
-  )
-```
-
-## Glimpse
-
-```{r}
-glimpse(hsp)
+#| echo: true
+#| eval: true 
+#| file: data.R
 ```
 
 ## Summary of variables
@@ -84,10 +57,6 @@ hsp |>
   add_overall() |>
   add_n() |>
   modify_header(label ~ "**Variable**")
-  # as_gt() |>
-  # tab_options(
-  #   quarto.disable_processing = TRUE
-  # )
 ```
 
 ## Correlations
@@ -106,7 +75,7 @@ my_fn <- function(data, mapping, method = "lm", ...) {
     geom_point(alpha = 0.5) + 
     geom_smooth(method = method, formula = y ~ x, se = FALSE,
                 col = RColorBrewer::brewer.pal(3, "Set1")[2], ...)
-  }
+}
 
 pm <-
   hsp |>
@@ -235,14 +204,6 @@ hsp |>
 #| fig-cap: Spatial distribution of median property prices by mukim.
 #| message: false
 #| warning: false
-hsp_mkm <-
-  hsp |>
-  summarise(
-    price = median(price, na.rm = TRUE, trim = 0.05),
-    .by = mukim
-  ) |>
-  left_join(x = bruneimap::mkm_sf) 
-
 ggplot(hsp_mkm) +
   geom_sf(aes(fill = price), col = "gray50", linewidth = 0.5) +
   scale_fill_viridis_c(
@@ -259,10 +220,10 @@ ggplot(hsp_mkm) +
     size = 2.7,
     stat = "sf_coordinates",
     max.overlaps = Inf,
-    min.segment.length = 0,       # Allow longer segments
-    segment.size = 0.3,           # Adjust the thickness of lines
-    segment.curvature = 0.1,      # Add curvature if needed
-    force = 5                     # Increase force to spread labels
+    min.segment.length = 0,       
+    segment.size = 0.3,           
+    segment.curvature = 0.1,      
+    force = 5                     
   ) +
   labs(x = NULL, y = NULL) +
   theme_bw()
@@ -277,27 +238,18 @@ ggplot(hsp_mkm) +
 #| out-width: 100%
 #| fig-height: 5
 #| fig-width: 9
-hsp_noland <- 
-  filter(hsp, type != "Land") |>
-  drop_na(type)
-hsp_all <- hsp_noland
-hsp_all$type <- "Overall"
-hsp_sld <- 
-  bind_rows(hsp_noland, hsp_all) |> 
-  arrange(date) 
-
-slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
-    df |>
-    drop_na(type) |>
-      summarise(
-        date = min(date), 
-        price = median(price, na.rm = TRUE),
-        plot_area = median(plot_area, na.rm = TRUE),
-        floor_area = median(floor_area, na.rm = TRUE),
-        .by = type
-      )
-  }, .before = 18, .after = 6) |>
-  distinct(date, type, .keep_all = TRUE) |>
+slider::slide_period_dfr(hsp_all, hsp_all$date, "month", \(df) {
+  df |>
+    filter(type != "Land") |>
+    summarise(
+      date = min(date), 
+      price = median(price, na.rm = TRUE),
+      plot_area = median(plot_area, na.rm = TRUE),
+      floor_area = median(floor_area, na.rm = TRUE),
+      .by = type
+    )
+}, .before = 18, .after = 6) |>
+  distinct(date, type, .keep_all = TRUE) |> 
   mutate(
     price_per_sqft = price / floor_area,
     type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
@@ -328,7 +280,6 @@ slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
   ) 
 ```
 
-
 ## RPPI Comparison
 
 ```{r}
@@ -338,34 +289,17 @@ slider::slide_period_dfr(hsp_sld, hsp_sld$date, "month", \(df) {
 #| out-width: 100%
 #| fig-height: 5
 #| fig-width: 9
-hsp_rppi <- hsp_noland |>
-  drop_na(floor_area)
 
-slider::slide_period_dfr(hsp_rppi, hsp_rppi$date, "month", \(df) {
-    df |>
-    drop_na(type) |>
-      summarise(
-        quarter = min(quarter),
-        price = median(price, na.rm = TRUE),
-        plot_area = median(plot_area, na.rm = TRUE),
-        floor_area = median(floor_area, na.rm = TRUE)
-      )
-  }, .before = 1, .after = 1) |> 
-  summarise(across(price:floor_area, \(x) median(x, na.rm = TRUE)), .by = quarter) |>
-  mutate(
-    price_per_sqft = price / floor_area,
-    index = price_per_sqft / price_per_sqft[quarter == "2015 Q1"],
-  ) |> 
-  right_join(rppi) |>  
+hsp_rppi |>  
   pivot_longer(c(index, rppi), names_to = "series", values_to = "value") |>
-  # mutate(series = factor(series, labels = c("PPS", "RPPI (BDCB)"))) |>
   ggplot(aes(x = quarter, y = value, col = series)) +
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_line(linewidth = 0.8) +
   scale_colour_brewer(palette = "Set1") +
   scale_y_continuous(labels = scales::percent, name = "Index") +
   zoo::scale_x_yearqtr(
-    format = "%Y-Q%q", name = NULL, #expand = c(0, 0),
+    format = "%Y-Q%q", 
+    name = NULL, 
     breaks = seq(2015, 2024.5, by = 0.25)
   ) +
   theme_bw() +
@@ -383,7 +317,5 @@ slider::slide_period_dfr(hsp_rppi, hsp_rppi$date, "month", \(df) {
     aes(label = label),
     hjust = 0
   ) +
-  # directlabels::geom_dl(aes(label = series), method = "last.points") +
   coord_cartesian(xlim = c(2015, 2025))
 ```
-
