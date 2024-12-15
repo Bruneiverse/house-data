@@ -120,7 +120,9 @@ The method variable details the data collection approach, which is further elabo
 :::
 
 ::: {.content-visible unless-format="html"}
+::: {.landscape}
 {{< embed analysis.qmd#tbl-summary >}}
+::: 
 :::
 
 <!-- {{< embed analysis.qmd#fig-corr >}} -->
@@ -164,12 +166,14 @@ In summary, 10.5% of the records contain missing values for all key house charac
 <!-- >  -->
 <!-- > It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions. -->
 
+In this section we describe the data collection process, which involved either a manual transcription of property listings from newspapers, or web scraping of online property agent listings.
+In the later years, a large language model (LLM) was also employed to perform data cleaning on the web scraped data.
+The data collection method varied over the years due to the availability of data sources and the evolution of technology.
+@tbl-avail details which method was used for each year in the dataset, and whether the data was subjected to LLM post-processing.
 
-
-
+All analyses were conducted using the R programming language [@rcoreteam2024language], with specific packages used described in each subsection below.
 
 {{< embed analysis.qmd#tbl-avail >}}
-
 
 ## Manual Data Collection
 
@@ -179,19 +183,70 @@ The primary sources of the property listings were local newspapers and magazines
 Physical copies were accessed through the National Archive of Brunei Darussalam, while digital versions, which are digitized replicas of the physical newspapers, were obtained online. 
 These digital formats could not be scraped due to their lack of structured data, necessitating manual transcription.
 
-Daily newspapers from 1993 onward were available at the National Archive.
+Although daily newspapers from 1993 onward were available at the National Archive, the classified sections were not always present.
+From 1993 to 1999, property advertisements were found only in Friday editions, and occasionally on Saturdays.
+Thus, newspapers from both these days were reviewed weekly to capture the listings data.
+This yielded roughly between 300 and 700 listings per year.
+
+From the year 2000 onwards, property advertisements were published daily in the classifieds section.
 However, reviewing every single daily edition was not practical and would increase the likelihood of recording duplicate listings, thus necessating a sampling strategy.
 The sampling was done as follows.
-Three newspaper edition per week was selected at random, and the classifieds section was reviewed for property listings. 
+Three newspaper editions per week were selected, and the classifieds section was reviewed for property listings. 
 When a listing was found, it was recorded after careful filtering to ensure it was unique. 
 This manual filtering process involved cross-checking based on the real estate agent, house characteristics, price, location, and date proximity. 
 To avoid duplication, the same house listing was typically not recorded more than once within a quarter. 
-This strategy aimed to achieve a target quota of 300–500 unique listings per year.
-
+This process yielded roughly the same number of listings per year as the earlier years.
 
 ## Web Scraping
 
-Web scraping of online property agent listings
+To compile additional property data for the study beyond manual data collection, web scraping was employed using the R programming language, leveraging the `{rvest}` package [@wickham2024rvest]. 
+This method enabled the systematic extraction of structured information from various local property listing websites such as panvilla.com (now defunct), bruhome.com, and bruneiproperty.com.bn.
+Such websites provide extensive details on properties listed as "for sale" in Brunei, aggregating advertisements from real estate agents and property developers.
+
+::: {#fig-web-scrape layout-ncol=1}
+
+::: {#fig-mockup-listing}
+![A mockup of the structure of property listing showing various HTML elements.](figures/house-mockup1.png)
+:::
+
+::: {#fig-mockup-table}
+![Example paragraph containing description within the "See Details" link for each property.](figures/house-mockup2.png)
+:::
+
+Illustration of a property listing from a typical Bruneian property portal. Attribution: Freepik.
+:::
+
+The process began by identifying the structure of the target websites, focusing on the HTML tags and classes containing the relevant information. 
+The goal here is to programmatically pinpoint and collect specific information like text, links, or attributes.
+For example, elements such as property prices, number of bedrooms, bathrooms, location, and other features were enclosed within specific HTML elements, which `{rvest}` functions like `html_elements()` and `html_text2()` could target and extract efficiently.
+@fig-mockup-listing illustrates the structure of a typical property listing showing the various HTML elements to target.
+Example code to perform this task in available in the repository.
+
+Each webpage displayed a fixed number of listings (e.g., 128 per page). 
+To scrape all pages, a loop was created to iterate through each page by modifying the URL (such as with an `&offset=<number>` parameter, where `<number>` represented the cumulative number of listings already scraped).
+
+Extracted data required some cleaning to standardize formats for analysis. 
+For instance:
+
+- `price` varibales were cleaned by removing non-numeric characters and converted to integers.
+- `beds` and `baths` were converted to integers.
+- `date` variables were formatted properly as `Date` objects.
+- Locations were stored as text strings. See the subsection below on spatial data harmonisation for more details.
+- Any additional information was extracted from the property descriptions, which were often unstructured and contained valuable insights not captured in the primary fields.
+
+<!-- The typical workflow for extracting data from a single property listing involved: -->
+
+<!-- 1.	Read the HTML: The read_html() function from {rvest} was used to load webpage content. -->
+<!-- 2.	Extract Key Elements: Functions like html_elements() and html_text2() targeted specific tags to extract data such as prices, beds, baths, and locations. -->
+<!-- 3.	Clean and Standardize: Extracted data were cleaned and converted to appropriate formats (e.g., numeric for prices, integers for bedrooms and bathrooms). -->
+<!-- 4.	Iterate Through Pages: A looping mechanism was employed to access subsequent pages by dynamically appending the offset parameter to the URL. -->
+<!-- 5.	Extract Additional Information: For individual property pages, a custom function was created to navigate links and extract further details using a mapping function (map()). -->
+
+Combining the workflow with a looping mechanism allowed for the systematic extraction of data from multiple pages and websites, and thus the automated scraping process enabled efficient data collection over time. 
+This process however was highly contingent on the consistency of the structure of the websites being scraped from.
+Over time, some websites shut down, while others changed their structure, requiring adjustments to the scraping scripts.
+The web scraping process began in January 2022 and was conducted intermittently.
+Data from 2012 up until the present (December 2024) were managed to be collected using this method, averaging around 1,500 listings per year.
 
 ## LLM Data Cleaning
 
