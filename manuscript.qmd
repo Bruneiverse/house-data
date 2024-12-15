@@ -47,10 +47,15 @@ engine: knitr
 <!-- - How can these data be reused by other researchers? -->
 <!-- - ... -->
 
-- {{< lipsum 1 >}}
-- {{< lipsum 1 >}}
-- {{< lipsum 1 >}}
-- Allow missing data in house characteristics... but compelte data is provided for price, date, and spatial information.
+- **First of its kind for Brunei**. This dataset enables comprehensive spatial and temporal analysis of the Brunei housing market. To our knowledge, no other publicly available dataset exists for this purpose, making it a significant contribution to the field. Previous studies on Brunei's housing have been limited to recent or non-spatial data [@shabunko2014developing;@ng2022characterising;@jamil2025leveraging], or qualitative in nature due to the lack of a structured dataset [@hassan2011cultural;@hassan2023sociocultural]. This aligns with the growing trend of using data analytics in the real estate industry [@braesemann2020proptech;@delisle2020big].
+
+- **Historical and spatial insights**. Covering data from 1993 to 2024, this dataset allows for the study of long-term housing trends in Brunei. Its detailed spatial information enables analysis at various levels, from kampong to mukim, providing insights into local patterns and urban development over time. This historical depth is particularly valuable given the lack of previous data before the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
+
+- **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI plays a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, guiding central bank decisions on interest rates. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s RightMove House Price Index [@hmlandregistry2023comparing; @europeancommission.eurostat.2013handbook]. This dataset demonstrates how programmatic methods can automate what is typically a time-consuming and labor-intensive process.
+
+- **Opportunities for handling of missing data**. While the dataset has complete information for key variables such as price, date, and spatial variables, missing information on house characteristics creates opportunities for further research. Evidently, house characteristics are inherently correlated (see [@fig-corr]), so imputation from observed correlations seems highly promising. With the spatial information present, this opens avenues for developing methodological approaches for handling missing data. Rather than being a limitation, the incomplete data in some variables encourages methodological innovation and exploration.
+
+- **Application of Large Language Models (LLMs)**. This project highlights an innovative use of Large Language Models (LLMs) for data cleaning. The LLM was employed to extract structured information from unstructured text descriptions, achieving an accuracy rate of 93%. This method significantly reduced the time and effort required for data cleaning. It can also be applied to other datasets with unstructured text, such as social media or document archives, to extract valuable information for analysis.
 
 # Background
 
@@ -58,10 +63,9 @@ engine: knitr
 
 The housing market is a key indicator of economic health and social well-being, yet comprehensive and publicly accessible datasets in Brunei remain limited. To our knowledge, this is the first dataset of its kind in Brunei, motivated by the need to fill the gap in publicly available data on the local housing market.
 
-Currently, the Brunei Darussalam Central Bank (BDCB) produces a Residential Property Price Index (RPPI) using data sourced from financial institutions, such as bank loan datasets. While the RPPI is published quarterly, the underlying raw data is not publicly available due to privacy restrictions. This limits research opportunities and transparency in understanding broader housing market trends. Furthermore, the RPPI only began in 2015, leaving a significant gap in historical housing data.
+Currently, the Brunei Darussalam Central Bank (BDCB) produces a Residential Property Price Index (RPPI) [@bdcb2021technical] using data sourced from financial institutions, such as bank loan datasets. While the RPPI is published quarterly, the underlying raw data is not publicly available due to privacy restrictions. This limits research opportunities and transparency in understanding broader housing market trends. Furthermore, the RPPI only began in 2015, leaving a significant gap in historical housing data.
 
 Our dataset addresses these challenges by providing a cost-effective and timely means to collect and analyze housing market data. Covering records from 1993 onward, it offers historical depth that complements and extends beyond the RPPI. It is valuable not only for tracking property price trends but also for advancing research in economics, urban planning, and real estate, supporting informed decision-making across sectors.
-
 
 # Data Description
 
@@ -72,9 +76,7 @@ Our dataset addresses these challenges by providing a cost-effective and timely 
 #| include: false
 years <- lubridate::year(hsp$date)
 max(years) - min(years) + 1
-
 ```
-
 
 The data has been curated into a single Comma-Separated Values (CSV) file named `hspbn_2024-12-12.csv`. 
 The dataset contains `{r} scales::comma(nrow(hsp))` property listing records which are enriched with area-level geotagged spatial information, spanning a period of `{r} max(years) - min(years) + 1` years from `{r} format(min(hsp$date), "%b %Y")` to `{r} format(max(hsp$date), "%b %Y")`.
@@ -126,8 +128,6 @@ The method variable details the data collection approach, which is further elabo
 ::: 
 :::
 
-<!-- {{< embed analysis.qmd#fig-corr >}} -->
-
 ## Spatial Information
 
 In Brunei Darussalam, the administrative areas are organised hierarchically into three levels.
@@ -154,12 +154,21 @@ This aggregation helps address potential issues like missing data (see section b
 
 ## Missing Values
 
-The dataset contains missing values across various property characteristics including type, tenure, status, plot area, floor area, storeys, beds, and baths.
-This is due to the nature of the property listings, which may not always include complete information when advertised.
-It is noted, however, that there are no missing values for price and spatial information.
-Missing values are represented by blank cells in the CSV file.
-The severity of missing values is summarised in @tbl-avail.
+This dataset endeavours to provide complete information regarding the listing date, spatial information, advertised price, and metadata.
+Nonetheless, we hereby report that missing values are present across various **property characteristics**, including type, tenure, status, plot area, floor area, storeys, beds, and baths.
+The reason for this is due to the nature of the property advertisements, which may not always include complete information when advertised by the real estate agents.
+Missing values are represented by blank cells in the CSV file, and the severity of missing values is summarised in @tbl-avail.
 In summary, 10.5% of the records contain missing values for all key house characteristics (i.e. plot area, floor area, beds, and baths), which, depending on the research question, may necessitate imputation or exclusion of these records.
+
+## Comparison to RPPI Data
+
+To demonstrate the quality of the dataset, we compared it with the Residential Property Price Index (RPPI) [@bdcb2021technical]  published by the Brunei Darussalam Central Bank (BDCB).
+A simple median price per square foot (PPSF) index can be calculated by aggregating the date by quarters.
+In so doing, missing values do not pose a significant issue as the index is calculated at the aggregate level.
+@fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our dataset.
+The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a high level of agreement between the two datasets.
+
+{{< embed analysis.qmd#fig-rppi >}}
 
 # Experimental Design, Materials and Methods
 
@@ -346,44 +355,61 @@ Minor inaccuracies were also observed in the LLM-based data cleaning process, bu
 Finally, while significant effort was made to harmonise spatial data, the matching of kampong names to standardised references may not be entirely error-free. 
 However, aggregation to the mukim level provides a reliable alternative for spatial analyses, ensuring that the dataset remains valuable for research and analysis.
 
-<!-- To alleviate concerns regarding data quality due to the limitations discussed above, we can compare the dataset with the Residential Property Price Index (RPPI) [@bdcb2021technical]  published by the Brunei Darussalam Central Bank (BDCB). -->
-<!-- A simple median price per square foot (PPSF) index can be calculated by aggregating the date by quarters. -->
-<!-- In so doing, missing values do not pose a significant issue as the index is calculated at the aggregate level. -->
-<!-- @fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our dataset. -->
-<!-- The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a high level of agreement between the two datasets. -->
-
-<!-- {{< embed analysis.qmd#fig-rppi >}} -->
-
 # Ethics
 
-> Data in Brief’s Guide for Authors contains detailed information on the ethical guidelines with which all authors must comply. In addition, we ask you to complete the relevant statement(s) below.  Please delete those which are not relevant for your data.
-> If your work involved human subjects, please include a statement here confirming that the relevant informed consent was obtained from those subjects, if the research was carried out in accordance with the Declaration of Helsinki, and if it includes the Ethical committee approval and the protocol number. A copy of the consent form (in English) can be submitted either in a data repository or under the section ‘Consent form’ while submitting the manuscript to the system.
->
-> If your work involved animal experiments, please include a statement here confirming that those experiments complied with the ARRIVE guidelines and were carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines; EU Directive 2010/63/EU for animal experiments; or the National Institutes of Health guide for the care and use of laboratory animals (NIH Publications No. 8023, revised 1978). Note, the sex of the animals must be indicated, and, where appropriate, the influence (or association) of sex on the results of the study.
-> 
-> If your work involved data collected from social media platforms, please include a statement here confirming that a) informed consent was obtained from participants or that participant data has been fully anonymized, and b) the platform(s)’ data redistribution policies were complied with.
-> 
-> If none of the above, please include a statement confirming that the authors have read and follow the ethical requirements for publication in Data in Brief and confirming that the current work does not involve human subjects, animal experiments, or any data collected from social media platforms.
+<!-- > Data in Brief’s Guide for Authors contains detailed information on the ethical guidelines with which all authors must comply. In addition, we ask you to complete the relevant statement(s) below.  Please delete those which are not relevant for your data. -->
+<!-- > If your work involved human subjects, please include a statement here confirming that the relevant informed consent was obtained from those subjects, if the research was carried out in accordance with the Declaration of Helsinki, and if it includes the Ethical committee approval and the protocol number. A copy of the consent form (in English) can be submitted either in a data repository or under the section ‘Consent form’ while submitting the manuscript to the system. -->
+<!-- > -->
+<!-- > If your work involved animal experiments, please include a statement here confirming that those experiments complied with the ARRIVE guidelines and were carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines; EU Directive 2010/63/EU for animal experiments; or the National Institutes of Health guide for the care and use of laboratory animals (NIH Publications No. 8023, revised 1978). Note, the sex of the animals must be indicated, and, where appropriate, the influence (or association) of sex on the results of the study. -->
+<!-- >  -->
+<!-- > If your work involved data collected from social media platforms, please include a statement here confirming that a) informed consent was obtained from participants or that participant data has been fully anonymized, and b) the platform(s)’ data redistribution policies were complied with. -->
+<!-- >  -->
+<!-- > If none of the above, please include a statement confirming that the authors have read and follow the ethical requirements for publication in Data in Brief and confirming that the current work does not involve human subjects, animal experiments, or any data collected from social media platforms. -->
+
+The authors confirm that the current work does not involve human subjects, animal experiments, or data collected from social media platforms. 
+The data described in this article were obtained from publicly available, non-personal, and factual sources, including physical and digital newspapers and magazines.
+
+Web scraping from local property listings websites was conducted in compliance with ethical and legal considerations. 
+Specifically, data were not collected from behind login barriers, and the terms of service (ToS) for the websites did not explicitly prohibit web scraping. 
+Furthermore, the `robots.txt` files for the websites were reviewed, and any policies outlined there were adhered to.
+No social media data was used in this study.
+
+The data collected consisted exclusively of non-copyrightable factual information, such as property characteristics and spatial locations, and excluded any potentially copyrighted content such as images. 
+To ensure privacy, no personally identifiable information, including specific property addresses, was scraped nor included in the dataset. 
+To this end, data from the description fields processed by the LLM are not included in the dataset, as they may contain sensitive information such as contact details and names of companies.
+Furthermore, we have ananoymised the real estate agents and agencies in the dataset.
 
 # CRediT Author Statement
 
-https://www.elsevier.com/researcher/author/policies-and-guidelines/credit-author-statement 
+<!-- https://www.elsevier.com/researcher/author/policies-and-guidelines/credit-author-statement  -->
+
+- **Haziq Jamil**: Conceptualization, Methodology, Software, Formal analysis, Data curation, Writing - Original Draft, Visualization, Supervision, Project administration, Funding acquisition.
+- **Amira Barizah Noorosmawie**: Software, Data curation, Writing - Original Draft.
+- **Hafeezul Waezz Rabu**: Software, Data curation, Writing - Original Draft.
+- **Lutfi Abdul Razak**: Conceptualization, Validation, Supervision, Funding acquisition.
 
 # Acknowledgements
-
-The authors gratefully acknowledge the contributions of Atikah Farhain Yahya, Nurulhanisah Abdul Manan, and Nina Zuhairi towards the collection and processing of the data contained within.
 
 <!-- In this section, mention all contributors who do not meet the criteria for authorship.  -->
 <!-- In addition, please list any funding sources in this section. List funding sources in the standard way to facilitate compliance to funder's requirements. -->
 <!-- If no funding has been provided for the research, please include the following sentence: -->
 <!-- This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors. -->
 
+The authors gratefully acknowledge the contributions of Atikah Farhain Yahya, Nurulhanisah Abdul Manan, and Nina Zuhairi towards the collection and processing of the data contained within.
+
 # Declaration of Competing Interests
 
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
-
 
 # References {.unnumbered}
 
 :::{#refs}
 :::
+
+# Appendix {.unnunmbered}
+
+## Pairwise Correlation Plot of Numeric Variables
+
+{{< embed analysis.qmd#fig-corr >}}
+
+
