@@ -28,7 +28,9 @@ hsp |>
     storeys = factor(
       ifelse(storeys >= 3, "3+", as.character(storeys)),
       levels = c("1", "2", "3+")
-    )
+    ),
+    district = gsub("Brunei Muara", "Brunei-Muara", district),
+    district = factor(district, levels = c("Brunei-Muara", "Belait", "Tutong", "Temburong"))
   ) |>
   tbl_summary(
     include = c(price:baths),
