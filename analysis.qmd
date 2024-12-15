@@ -299,6 +299,7 @@ hsp_rppi |>
   scale_y_continuous(labels = scales::percent, name = "Index") +
   zoo::scale_x_yearqtr(
     format = "%Y-Q%q", 
+    expand = c(0, 0.1),
     name = NULL, 
     breaks = seq(2015, 2024.5, by = 0.25)
   ) +
@@ -317,5 +318,5 @@ hsp_rppi |>
     aes(label = label),
     hjust = 0
   ) +
-  coord_cartesian(xlim = c(2015, 2025))
+  coord_cartesian(xlim = c(2015, 2025.5))
 ```

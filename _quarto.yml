@@ -32,6 +32,7 @@ execute:
   cache: true
   freeze: auto
   warning: false
+  code-overflow: wrap
 
 editor_options: 
   chunk_output_type: console

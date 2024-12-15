@@ -50,6 +50,7 @@ engine: knitr
 - {{< lipsum 1 >}}
 - {{< lipsum 1 >}}
 - {{< lipsum 1 >}}
+- Allow missing data in house characteristics... but compelte data is provided for price, date, and spatial information.
 
 # Background
 
@@ -232,7 +233,7 @@ For instance:
 - `beds` and `baths` were converted to integers.
 - `date` variables were formatted properly as `Date` objects.
 - Locations were stored as text strings. See the subsection below on spatial data harmonisation for more details.
-- Any additional information was extracted from the property descriptions, which were often unstructured and contained valuable insights not captured in the primary fields.
+- Any additional information was extracted from the property descriptions and saved as a character vector. This very often contained valuable insights not captured in the primary fields.
 
 <!-- The typical workflow for extracting data from a single property listing involved: -->
 
@@ -250,25 +251,108 @@ Data from 2012 up until the present (December 2024) were managed to be collected
 
 ## LLM Data Cleaning
 
-A test on 329 randomly selected data points found that 306 were "correct" (93.0% accuracy), i.e. usable in the sense that either the details were extracted correctly or correctly identified "non listings".
+As mentioned, the web scraping process also captured unstructured information from the property descriptions, which often contained valuable details not captured in the primary fields.
+In this subsection, we detail the data cleaning process using a pre-trained large language model (LLM) to extract structured information from the unstructured text.
+The LLM used was Llama 3.1 with 8B parameters [@grattafiori2024llama], accessed using the `{tidychatmodels}` R package [@rapp2024tidychatmodels] via the Ollama^[<https://github.com/ollama/ollama>] API, a local interface platform to the LLM.
+
+The primary goal was to extract the house characteristics of interest, specifically variables 7 to 15 as per @tbl-codebook, from the unstructured verbose descriptions scraped from property listing websites. 
+Each description was processed with a carefully designed prompt (@fig-llm-prompt) to ensure consistent output. 
+This prompt instructed the model to return only the required information in a semicolon-separated format, while handling edge cases such as missing descriptions, non-residential (commercial) properties, or rental property advertisements.
+
+::: {#fig-llm-prompt}
+```{r}
+#| echo: true
+#| eval: false
+#| code-overflow: wrap
+"The following is the description from a property sale listing in Brunei. This description will contain the information about the property, including its characteristics, price, and location. However, some of these descriptions may not contain property listings, and instead contain other or no information at all.
+
+In the case where this description is in fact a property listing, I would like you to extract the following information:
+
+1. Location / area of the property in Brunei, CHARACTER.
+2. Price of the property in Brunei Dollars, NUMERIC.
+3. Type of property, CHARACTER -- select from Detached, Semi-Detached, Terrace, Apartment, or Land.
+4. Land tenure, CHARACTER -- select from Freehold, Leasehold, or Strata. If other than this, return 'NA'.
+5. Status of the property, CHARACTER -- select from Proposed, Under Construction, New, or Resale.
+6. Land area in acres, NUMERIC.
+7. Built up area in square feet, NUMERIC.
+8. Number of storeys, INTEGER.
+9. Number of bedrooms, INTEGER.
+10. Number of bathrooms, INTEGER.
+
+Further instructions:
+
+- Please return **semicolon** separated values like this:
+
+  Kg Tanah Jambu; 250000; Detached ; Freehold ; New     ; 0.3 ; 2500; 2;  3; 3
+  Kg Tungku     ; 300000; Terrace  ; Leasehold; Resale  ; 0.25; 1700; 2;  3; 2 
+  Kg Kiarong    ; 200000; Apartment; Strata   ; Proposed; 0.1 ; 1000; NA; 2; 2
+  etc.
+  NUMBERS SHOULD NOT CONTAIN comma (,) for thousands separator
+
+- If any of the 10 values are missing, please return 'NA' for that value.
+
+- If the description does not contain a property listing (for example, it is a rental property advertisement), return 'NA' for all 10 values.
+
+- DO NOT RESPOND WITH ANYTHING ELSE OTHER THAN THE REQUIRED INFORMATION."
+```
+
+The LLM prompt to clean descriptions obtained from web scraping.
+
+:::
+
+The unstructured descriptions were fed into the model one at a time using a loop, with the LLM extracting and returning the relevant details. 
+Note that this loop was not parallelided due to the computational resources required by the LLM.
+The cleaned results were then parsed and stored in a data frame, which was then subjected to data-type validation to ensure conformity with the existing dataset.
+It takes on average 2.12 seconds to process a single description running on Apple MacBook Air M2 Silicon on Chip (SoC) and System in Chip (SiP) processors with 16GB RAM.
+We processed 4,820 descriptions in total from 2020 to 2024 using this method, with a runtime of approximately three hours.
+
+To test the accuracy of the LLM, a random sample of 329 descriptions was selected and manually verified for correctness.
+Of these, 306 were deemed correct (correct entries or identified "non-listings" correctly), resulting in an accuracy rate of 93.0%.
+Rare errors were spotted due to model hallucinations (despite setting the LLM temperature to the lowest setting), but these are typically minor and unlikely to significantly impact the overall analysis.
+Large errors on the other hand were corrected manually, by filtering for outliers or inconsistencies in the variables.
+Overall, the LLM was found to be a valuable tool for extracting structured information from unstructured text, significantly reducing the time and effort required for data cleaning.
+Users may wish to exclude these records from their analysis if they are concerned about the accuracy of the extracted data.
 
 ## Spatial Data Harmonisation
 
-## Comparison with RPPI
+Whether the data was collected manually, through web scraping, or cleaned using the LLM, the spatial information extracted was often inconsistent in terms of naming conventions and granularity.
+To address this, a spatial data harmonisation process was conducted to standardise the names of the kampongs (villages) in the data set to the format used by Department of Economic Planning and Statistics (DEPS), Ministry of Finance and Economy, Brunei Darussalam as per the most recent census [@deps2022population].
+This is the same format used by the R package `{bruneimap}` [@jamil2024bruneimap].
+The CSV file `bn_kpg_level_data.csv` obtained from this package was used as a reference to standardise the kampong names in the dataset, which conveniently also included the mukim and district names for each kampong.
 
+The majority of house listings in Brunei specify the property location using the kampong name, the smallest administrative unit in the country. 
+The task in hand was then to match these kampong names in the dataset with the standardised names in the reference file. 
+Several challenges were encountered during this process, including:
 
+1. Spelling variations or misspellings, though these were relatively straightforward to correct.
+2. Unknown entries, where the correct kampong could sometimes be inferred from the geographical context; otherwise, these were set to `NA`.
+3. Multiple matches, occurring when two or more kampongs shared the same name (e.g., Kampong Panchor in Mukim Mentiri and Kampong Panchor in Mukim Lumapas). Additional information from the listing was used to determine the correct match, but where this was not possible, these entries were also set to `NA`.
 
-
-{{< embed analysis.qmd#fig-rppi >}}
-
+This process was carried out manually using data filtering features in Microsoft Excel. 
+Once completed, all entries marked as `NA` were removed so as to provide complete spatial information for each listing.
 
 # Limitations
 
 <!-- > Describe any limitations related to the data described in this article. These could be any problems you faced during data collection or curation, limited quality or size of dataset, data biases, etc., but should not include limitations of analysis conducted or interpretation (Max. 200 words). If there are none, please write ‘None’ or ‘Not applicable’. -->
 
-- While effort has been made to ensure duplicate listings are removed, there is a slight possibility that some have slipped through the cracks.
-- Data coverage. Only popular advertisements listed... So not a lot in Temburong or Tutong.
-- Missing data.
+Despite efforts to ensure data quality, some limitations remain. 
+While duplicate listings were carefully reviewed and removed, there remains a slight possibility that a duplicated records still exist in the dataset. 
+Additionally, the spatial data coverage is heavily skewed towards the Brunei-Muara district, which accounts for `{r} scales::percent(prop.table(table(hsp$district))[2], accuracy = 0.1)` of the listings. 
+This simply reflects the district’s higher population and greater volume of property transactions [@jamil2024spatiotemporal] which could bias analyses toward this region.
+
+Missing data in house characteristics is another limitation, although this should be seen as an opportunity for further research to develop imputation methods or alternative analytical approaches. 
+Minor inaccuracies were also observed in the LLM-based data cleaning process, but these issues are infrequent and can be mitigated by subsetting or refining the affected entries.
+
+Finally, while significant effort was made to harmonise spatial data, the matching of kampong names to standardised references may not be entirely error-free. 
+However, aggregation to the mukim level provides a reliable alternative for spatial analyses, ensuring that the dataset remains valuable for research and analysis.
+
+<!-- To alleviate concerns regarding data quality due to the limitations discussed above, we can compare the dataset with the Residential Property Price Index (RPPI) [@bdcb2021technical]  published by the Brunei Darussalam Central Bank (BDCB). -->
+<!-- A simple median price per square foot (PPSF) index can be calculated by aggregating the date by quarters. -->
+<!-- In so doing, missing values do not pose a significant issue as the index is calculated at the aggregate level. -->
+<!-- @fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our dataset. -->
+<!-- The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a high level of agreement between the two datasets. -->
+
+<!-- {{< embed analysis.qmd#fig-rppi >}} -->
 
 # Ethics
 

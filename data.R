@@ -12,7 +12,7 @@ hsp <-
     type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
                                    "Apartment", "Land")),
     tenure = factor(tenure, levels = c("Freehold", "Leasehold", "Strata")),
-    status = factor(status, levels = c("Proposed", "New", "Resale")),
+    status = factor(status, levels = c("Proposed", "Under Construction", "New", "Resale")),
     date = as.Date(date, format = "%d/%m/%y"),
     quarter = zoo::as.yearqtr(quarter)
   )
