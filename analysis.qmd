@@ -1,5 +1,5 @@
 ---
-title: Plots and data summaries for manuscript
+title: Plots and Data Summaries
 author: Haziq Jamil
 page-layout: full
 grid:

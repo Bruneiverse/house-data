@@ -1,0 +1,16 @@
+---
+title: Example Data Cleaning using LLM
+author: Haziq Jamil
+page-layout: full
+grid:
+  sidebar-width: 0px
+editor_options: 
+  chunk_output_type: console
+html-table-processing: none
+---
+
+```{r}
+#| echo: true
+#| eval: true 
+#| file: llm.R
+```

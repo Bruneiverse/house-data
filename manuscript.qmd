@@ -1,5 +1,5 @@
 ---
-title: House price data in Brunei
+title: "From Archives to AI: A Dataset of Residential Property Listings in Brunei Darussalam"
 authors:
   - name: Haziq Jamil
     orcid: 0000-0003-3298-1010
@@ -251,9 +251,10 @@ For instance:
 <!-- 4.	Iterate Through Pages: A looping mechanism was employed to access subsequent pages by dynamically appending the offset parameter to the URL. -->
 <!-- 5.	Extract Additional Information: For individual property pages, a custom function was created to navigate links and extract further details using a mapping function (map()). -->
 
-Combining the workflow with a looping mechanism allowed for the systematic extraction of data from multiple pages and websites, and thus the automated scraping process enabled efficient data collection over time. 
+Combining the workflow with a looping mechanism allowed for the systematic extraction of data from multiple pages and websites, and thus the automated scraping process enabled efficient data collection over time. REWORD / REMOVE
 This process however was highly contingent on the consistency of the structure of the websites being scraped from.
 Over time, some websites shut down, while others changed their structure, requiring adjustments to the scraping scripts.
+[THAT'S WHY WE THOUGHT OF THE LLM THING...] 
 The web scraping process began in January 2022 and was conducted intermittently.
 Data from 2012 up until the present (December 2024) were managed to be collected using this method, averaging around 1,500 listings per year.
 
@@ -264,6 +265,7 @@ In this subsection, we detail the data cleaning process using a pre-trained larg
 The LLM used was Llama 3.1 with 8B parameters [@grattafiori2024llama], accessed using the `{tidychatmodels}` R package [@rapp2024tidychatmodels] via the Ollama^[<https://github.com/ollama/ollama>] API, a local interface platform to the LLM.
 
 The primary goal was to extract the house characteristics of interest, specifically variables 7 to 15 as per @tbl-codebook, from the unstructured verbose descriptions scraped from property listing websites. 
+FOR THE REST OF THE VARIABLES, THIS CAN BE DONE SYSTEMATICALLY (e.g. dates and other metadata like agent name).
 Each description was processed with a carefully designed prompt (@fig-llm-prompt) to ensure consistent output. 
 This prompt instructed the model to return only the required information in a semicolon-separated format, while handling edge cases such as missing descriptions, non-residential (commercial) properties, or rental property advertisements.
 

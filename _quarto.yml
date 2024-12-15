@@ -6,22 +6,30 @@ project:
   
 manuscript:
   article: manuscript.qmd
-  resources:
-    - data/rppi.csv
   code-links:
     - repo
-    - text: BDCB RPPI
-      icon: database
-      href: data/rppi.csv
+    - text: Web Scraping House Data
+      icon: code
+      href: webscrape.R
+    - text: Data Cleaning using LLM
+      icon: code
+      href: llm.R
 
 format:
-  html: default
+  html: 
+    other-links:
+      - text: BDCB RPPI
+        icon: database
+        href: data/rppi.csv
+      - text: Brunei Spatial Area Data
+        icon: database
+        href: https://github.com/Bruneiverse/bruneimap/blob/main/datasrc/bn_kpg_level_data.csv
   docx: 
     reference-doc: data-in-brief-article-template.docx
-    output-file: jamil2025property
+    output-file: jamil2025archives
   elsevier-pdf:
     keep-tex: false    
-    output-file: jamil2025property
+    output-file: jamil2025archives
     journal:
       name: Data in Brief
     header-includes:
