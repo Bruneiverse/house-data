@@ -1,5 +1,5 @@
 ---
-title: Example Data Cleaning using LLM
+title: Data Cleaning using LLM
 author: Haziq Jamil
 page-layout: full
 grid:
@@ -14,3 +14,8 @@ html-table-processing: none
 #| eval: true 
 #| file: llm.R
 ```
+
+```{r}
+gt::gt(df)
+```
+

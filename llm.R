@@ -5,7 +5,7 @@ library(tidychatmodels)
 # Note: Before starting, ensure to install Ollama (https://ollama.com), and use
 # the terminal to download the model you wish to use. Here, we use llama3.1.
 
-# Sample description
+# Sample description (artificially created)
 x <- "
 🌟 MODERN DOUBLE STOREY DETACHED HOUSE FOR SALE — TUNGKU 🌟
 
@@ -85,6 +85,13 @@ clean_desc <- function(caption) {
     dplyr::pull(message)
 }
 
+# Test Ollama works
+create_chat("ollama") |>
+  add_model("llama3.1") |>
+  add_message("Hello, how are you?") |>
+  perform_chat() |>
+  extract_chat()
+
 # Test the function
 tictoc::tic()
 y <- clean_desc(x)
@@ -101,7 +108,8 @@ tictoc::toc()
 
 # In any case, to convert the (cleaned) character vector to a data frame, we
 # separate the strings by ';' as follows:
-tibble(clean = y) |>
+df <-
+  tibble(clean = y) |>
   separate(
     clean,
     into = c("location", "price", "type", "tenure", "status", "plot_area", "floor_area", "storeys", "beds", "baths"),

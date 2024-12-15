@@ -1,5 +1,5 @@
 ---
-title: "From Archives to AI: A Dataset of Residential Property Listings in Brunei Darussalam"
+title: "From Archives to AI: Residential Property Listings Across Three Decades in Brunei Darussalam"
 authors:
   - name: Haziq Jamil
     orcid: 0000-0003-3298-1010
@@ -28,6 +28,15 @@ authors:
 date-modified: last-modified
 abstract: |
   This article introduces the first publicly available dataset for analyzing the Brunei housing market, covering 31,495 property listings from 1993 to 2024. The dataset, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with large language models (LLMs) to structure unformatted text. The dataset enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as potential missing values and spatial coverage bias toward the Brunei-Muara district, this dataset provides a robust foundation for exploring housing market trends and informing policy decisions.
+keywords:
+  - Housing Market
+  # - Real Estate
+  - Brunei
+  - Property Listings
+  # - Advertisements
+  - Spatial Data
+  - Web Scraping
+  - Large Language Models
 ---
 
 ```{r}

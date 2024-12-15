@@ -50,3 +50,9 @@ bibliography:
 csl: data-in-brief.csl
 
 engine: knitr
+
+citation: 
+  type: article-journal
+  issued: 2025
+google-scholar: true
+
