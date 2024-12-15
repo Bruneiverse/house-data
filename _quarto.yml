@@ -40,3 +40,5 @@ editor_options:
 bibliography:
   - refs-HJ.bib
 csl: data-in-brief.csl
+
+engine: knitr
