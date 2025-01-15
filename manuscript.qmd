@@ -57,9 +57,9 @@ keywords:
 
 - **First of its kind for Brunei**. This dataset enables comprehensive spatial and temporal analysis of the Brunei housing market. To our knowledge, no other publicly available dataset exists for this purpose, making it a significant contribution to the field. Previous studies on Brunei's housing have been limited to recent or non-spatial data [@shabunko2014developing;@ng2022characterising;@jamil2025leveraging], or qualitative in nature due to the lack of a structured dataset [@hassan2011cultural;@hassan2023sociocultural]. This aligns with the growing trend of using data analytics in the real estate industry [@braesemann2020proptech;@delisle2020big].
 
-- **Historical and spatial insights**. Covering data from 1993 to 2024, this dataset allows for the study of long-term housing trends in Brunei. Its detailed spatial information enables analysis at various levels, from kampong to mukim, providing insights into local patterns and urban development over time. This historical depth is particularly valuable given the lack of previous data before the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
+- **Historical and spatial insights**. Covering data from 1993 to 2024, this dataset allows for the study of long-term housing trends in Brunei. The spatial information available enables analysis at various administrative levels, providing insights into local patterns and urban development over time. This historical depth is particularly valuable given the lack of previous data before the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
 
-- **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI plays a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, guiding central bank decisions on interest rates. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s RightMove House Price Index [@hmlandregistry2023comparing; @europeancommission.eurostat2013handbook]. This dataset demonstrates how programmatic methods can automate what is typically a time-consuming and labor-intensive process.
+- **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI can potentially play a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, providing guidance to the central bank decisions. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s RightMove House Price Index [@hmlandregistry2023comparing; @europeancommission.eurostat2013handbook]. This dataset demonstrates how programmatic methods can automate what is typically a time-consuming and labour-intensive process.
 
 - **Opportunities for handling of missing data**. While the dataset has complete information for key variables such as price, date, and spatial variables, missing information on house characteristics creates opportunities for further research. Evidently, house characteristics are inherently correlated (see [@fig-corr]), so imputation from observed correlations seems highly promising. With the spatial information present, this opens avenues for developing methodological approaches for handling missing data. Rather than being a limitation, the incomplete data in some variables encourages methodological innovation and exploration.
 
@@ -171,8 +171,10 @@ In summary, 10.5% of the records contain missing values for all key house charac
 ## Comparison to RPPI Data
 
 To demonstrate the quality of the dataset, we compared it with the Residential Property Price Index (RPPI) [@bdcb2021technical]  published by the Brunei Darussalam Central Bank (BDCB).
-A simple median price per square foot (PPSF) index can be calculated by aggregating the date by quarters.
-In so doing, missing values do not pose a significant issue as the index is calculated at the aggregate level.
+A simple median price per square foot (PPSF) index can be calculated by aggregating the data by quarters.
+<!-- @fig-rppi shows the median smoothed PPSF by property type using a 24-month (8-quarter) rolling window. -->
+<!-- Generally the property price trends reflect macroeconomic conditions. -->
+This approach minimises the impact of missing values, as the index is based on aggregated data.
 @fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our dataset.
 The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a high level of agreement between the two datasets.
 
@@ -328,7 +330,7 @@ We processed 4,820 descriptions in total from 2020 to 2024 using this method, wi
 To test the accuracy of the LLM, a random sample of 329 descriptions was selected and manually verified for correctness.
 Of these, 306 were deemed correct (correct entries or identified "non-listings" correctly), resulting in an accuracy rate of 93.0%.
 Rare errors were spotted due to model hallucinations (despite setting the LLM temperature to the lowest setting), but these are typically minor and unlikely to significantly impact the overall analysis.
-Large errors on the other hand were corrected manually, by filtering for outliers or inconsistencies in the variables.
+Large errors on the other hand were corrected manually, by filtering for outliers (values exceeding three standard deviations from the mean in magnitude) or inconsistencies in the variables.
 Overall, the LLM was found to be a valuable tool for extracting structured information from unstructured text, significantly reducing the time and effort required for data cleaning.
 Users may wish to exclude these records from their analysis if they are concerned about the accuracy of the extracted data.
 
@@ -358,6 +360,8 @@ Despite efforts to ensure data quality, some limitations remain.
 While duplicate listings were carefully reviewed and removed, there remains a slight possibility that a duplicated records still exist in the dataset. 
 Additionally, the spatial data coverage is heavily skewed towards the Brunei-Muara district, which accounts for `{r} scales::percent(prop.table(table(hsp$district))[2], accuracy = 0.1)` of the listings. 
 This simply reflects the district’s higher population and greater volume of property transactions [@jamil2024spatiotemporal] which could bias analyses toward this region.
+While confidence in the data quality is high from 2015 to 2024, property price trends between 1993 and 2014 cannot be fully verified. 
+Nonetheless, this study serves as a valuable starting point, but access to administrative transaction data would significantly enhance future research.
 
 Missing data in house characteristics is another limitation, although this should be seen as an opportunity for further research to develop imputation methods or alternative analytical approaches. 
 Minor inaccuracies were also observed in the LLM-based data cleaning process, but these issues are infrequent and can be mitigated by subsetting or refining the affected entries.

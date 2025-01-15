@@ -54,5 +54,7 @@ engine: knitr
 citation: 
   type: article-journal
   issued: 2025
+  container-title: "Manuscript in Submission"
+  url: http://haziqj.ml/house-price/papers/jamil2025spatio/
 google-scholar: true
 
