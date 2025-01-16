@@ -22,6 +22,7 @@ html-table-processing: none
 ```{r}
 #| label: tbl-summary
 #| tbl-cap: Summary of housing data.
+#| html-table-processing: none
 hsp |>
   mutate(
     price = price / 1000,
@@ -58,7 +59,8 @@ hsp |>
   ) |>
   add_overall() |>
   add_n() |>
-  modify_header(label ~ "**Variable**")
+  modify_header(label ~ "**Variable**") |>
+  as_gt()
 ```
 
 ## Correlations

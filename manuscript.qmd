@@ -38,7 +38,7 @@ keywords:
 ---
 
 ```{r}
-#| echo: false
+#| include: false
 #| eval: true 
 #| file: data.R
 ```
@@ -94,13 +94,36 @@ The data set contains `{r} scales::comma(nrow(hsp))` property listing records wh
 The `{r} scales::comma(ncol(hsp))` columns of this data set capture information for each property listing as detailed in @tbl-codebook below.
 
 ```{r}
-#| label: tbl-codebook
-#| tbl-cap: Codebook for the house price data set.
-readxl::read_xlsx("data/codebook.xlsx") |>
+#| include: false
+codebook_gt <-
+  readxl::read_xlsx("data/codebook.xlsx") |>
   rownames_to_column("No.") |>
   gt(rowname_col = "No.") |>
-  fmt_markdown("Variable")
+  fmt_markdown(c("Variable", "Details"))
 ```
+
+
+::: {#tbl-codebook}
+
+::: {.content-visible unless-format="pdf"}
+```{r}
+#| html-table-processing: none
+codebook_gt
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r}
+codebook_gt |>
+  tab_options(table.font.size = 12) |>
+  cols_width(Details ~ px(400)) |>
+  as_latex()
+```
+:::
+
+Codebook for the house price data set.
+:::
+
 
 ## Property Characteristics
 
@@ -280,15 +303,23 @@ This prompt instructed the model to return only the required information in a se
 #| echo: true
 #| eval: false
 #| code-overflow: wrap
-"The following is the description from a property sale listing in Brunei. This description will contain the information about the property, including its characteristics, price, and location. However, some of these descriptions may not contain property listings, and instead contain other or no information at all.
+"The following is the description from a property sale listing in Brunei. This 
+description will contain the information about the property, including its 
+characteristics, price, and location. However, some of these descriptions may 
+not contain property listings, and instead contain other or no information at 
+all.
 
-In the case where this description is in fact a property listing, I would like you to extract the following information:
+In the case where this description is in fact a property listing, I would like 
+you to extract the following information:
 
 1. Location / area of the property in Brunei, CHARACTER.
 2. Price of the property in Brunei Dollars, NUMERIC.
-3. Type of property, CHARACTER -- select from Detached, Semi-Detached, Terrace, Apartment, or Land.
-4. Land tenure, CHARACTER -- select from Freehold, Leasehold, or Strata. If other than this, return 'NA'.
-5. Status of the property, CHARACTER -- select from Proposed, Under Construction, New, or Resale.
+3. Type of property, CHARACTER -- select from Detached, Semi-Detached, Terrace, 
+Apartment, or Land.
+4. Land tenure, CHARACTER -- select from Freehold, Leasehold, or Strata. If 
+other than this, return 'NA'.
+5. Status of the property, CHARACTER -- select from Proposed, Under 
+Construction, New, or Resale.
 6. Land area in acres, NUMERIC.
 7. Built up area in square feet, NUMERIC.
 8. Number of storeys, INTEGER.
@@ -307,7 +338,8 @@ Further instructions:
 
 - If any of the 10 values are missing, please return 'NA' for that value.
 
-- If the description does not contain a property listing (for example, it is a rental property advertisement), return 'NA' for all 10 values.
+- If the description does not contain a property listing (for example, it is a 
+rental property advertisement), return 'NA' for all 10 values.
 
 - DO NOT RESPOND WITH ANYTHING ELSE OTHER THAN THE REQUIRED INFORMATION."
 ```

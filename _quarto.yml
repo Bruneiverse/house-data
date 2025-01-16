@@ -33,6 +33,7 @@ format:
   elsevier-pdf:
     keep-tex: false    
     output-file: jamil2025archives
+    number-sections: false
     journal:
       name: Data in Brief
     header-includes:
