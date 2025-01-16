@@ -270,7 +270,7 @@ For example, elements such as property prices, number of bedrooms, bathrooms, lo
 Example code to perform this task in available in the repository.
 
 Each webpage displayed a fixed number of listings (e.g. 128 per page). 
-To scrape all pages, a loop was created to iterate through each page by modifying the URL (such as with an `&offset=<number>` parameter, where `<number>` represented the cumulative number of listings already scraped).
+To scrape all pages, a loop was created to iterate through each page by modifying the URL (such as with an `&offset=<number>` parameter, where `<number>` represents the cumulative number of listings already scraped).
 
 Extracted data required some cleaning to standardise formats for analysis. 
 Specifically:
