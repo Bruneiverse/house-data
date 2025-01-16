@@ -215,7 +215,7 @@ Thus, newspapers from both these days were reviewed weekly to capture the listin
 This yielded roughly between 300 and 700 listings per year.
 
 From the year 2000 onwards, property advertisements were published daily in the classifieds section. 
-However, reviewing every single daily edition was not practical and would increase the likelihood of recording duplicate listings, thus necessating a sampling strategy. 
+However, reviewing every single daily edition was not practical and would increase the likelihood of recording duplicate listings, thus necessitating a sampling strategy. 
 The sampling was done as follows. Three newspaper editions per week were selected, and the classifieds section was reviewed for property listings. 
 When a listing was found, it was recorded after careful filtering to ensure it was unique. 
 This manual filtering process involved cross-checking based on the real estate agent, house characteristics, price, location, and date proximity. 

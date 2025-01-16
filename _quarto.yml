@@ -18,6 +18,9 @@ manuscript:
 format:
   html: 
     other-links:
+      - text: Brunei House Price Data
+        icon: database
+        href: data/hspbn_2024-12-12.csv  
       - text: BDCB RPPI
         icon: database
         href: data/rppi.csv
