@@ -93,9 +93,10 @@ create_chat("ollama") |>
   extract_chat()
 
 # Test the function
-tictoc::tic()
-y <- clean_desc(x)
-tictoc::toc()
+microbenchmark::microbenchmark(
+  y <- clean_desc(x),
+  times = 10
+)
 
 # Next, might want to map this function to a column of descriptions in a data
 # frame, like so:
