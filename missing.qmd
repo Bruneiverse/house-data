@@ -91,7 +91,7 @@ Suppose we want to induce missingness in B with the same pattern as A.
 Here's the code to do it:
 
 ```{r}
-set.seed(456)
+set.seed(123)
 datA <- hsp24
 datB <- drop_na(hsp24)
 
