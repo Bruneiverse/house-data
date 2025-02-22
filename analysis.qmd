@@ -324,3 +324,16 @@ hsp_rppi |>
   ) +
   coord_cartesian(xlim = c(2015, 2025.5))
 ```
+
+## LLM Test
+
+```{r}
+#| label: fig-llmtest
+#| fig-cap: Model accuracy comparison using the LLM test data set.
+#| fig-height: 5
+#| fig-width: 7
+#| out-width: 100%
+load("experiments/llm_test.RData")
+p_llm_test
+```
+

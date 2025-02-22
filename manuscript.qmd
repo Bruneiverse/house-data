@@ -446,3 +446,61 @@ The authors declare that they have no known competing financial interests or per
 ## Pairwise Correlation Plot of Numeric Variables
 
 {{< embed analysis.qmd#fig-corr >}}
+
+## LLM Accuracy Test
+
+To test the accuracy of the LLM data cleaning, we created a test data set of 100 house advertisements in the style of the web scraped data.
+Several popular models from Ollama were used, namely the Llama 3.2 (3B), Mistral (7B), Phi4 (14B), and DeepSeek-R1 distilled reasoning models based on Llama (8B) and Qwen (14B).
+Additionally, two models from OpenAI were included for comparison. 
+These were the GPT-4o and the o1-mini, with the latter being a reasoning model.
+
+The metric used to assess accuracy is a similarity measure within a tolerance of 1% of the true value. 
+For numeric variables, the absolute difference is used.
+For non-numeric variables, the normalised Levenshtein distance is used.
+The code to replicate the analysis is available on the GitHub repository.
+
+The results show that reasoning models outperform the non-reasoning models, with OpenAI's o1-mini model performing the best (98.2% accuracy) followed by the locally run deepseek-r1:14b Ollama model (92.5% accuracy).
+Most inaccuracies are seen in the `status` variable, where the models had a difficult time parsing the correct build status from the advertisement.
+However, key variables such as `price`, `type`, `plot_area`, `floor_area`, `beds`, and `baths` are generally reliable (>90% accuracy).
+
+{{< embed analysis.qmd#fig-llmtest >}}
+
+The run time statistics for each model is shown in the table below.
+Running OpenAI's models are much faster than running models locally, though a paid API key is required.
+
+```{r}
+#| label: tbl-llmtest-time
+#| tbl-cap: Single run time statistics for LLM data cleaning for each model in seconds.
+llmtest_time <-
+  tibble(
+    model = c("llama3.2", "mistral", "phi4", "deepseek-r1:8b", "deepseek-r1:14b", "gpt-4o", "o1-mini"),
+    min = c(4.705968, 2.695677, 7.763636, 49.028515, 97.197804, 1.279267, 5.968378),
+    mean = c(6.136084, 8.385252, 21.278234, 77.494729, 146.424187, 2.457973, 7.945925),
+    median = c(6.278579, 9.302804, 25.710515, 69.055948, 149.651830, 1.733497, 7.506522),
+    max = c(7.830766, 13.328297, 28.309253, 138.477761, 212.098819, 5.379483, 9.943231)
+  )
+
+gt(llmtest_time) |>
+  fmt_number(decimals = 2) |>
+  cols_label(
+    model = "Model",
+    min = "Minimum",
+    mean = "Mean",
+    median = "Median",
+    max = "Maximum"
+  ) |>
+  tab_spanner(
+    label = "Time (seconds)",
+    columns = min:max
+  )
+```
+
+<!-- Unit: seconds -->
+<!--             expr       min         lq       mean     median         uq        max neval cld -->
+<!--         llama3.2  4.705968   5.343346   6.136084   6.278579   6.521761   7.830766     5 a   -->
+<!--          mistral  2.695677   4.423615   8.385252   9.302804  12.175866  13.328297     5 a   -->
+<!--             phi4  7.763636  17.141029  21.278234  25.710515  27.466739  28.309253     5 a   -->
+<!--   deepseek-r1:8b 49.028515  53.375558  77.494729  69.055948  77.535864 138.477761     5  b  -->
+<!--  deepseek-r1:14b 97.197804 119.387742 146.424187 149.651830 153.784741 212.098819     5   c -->
+<!--           gpt-4o  1.279267   1.502509   2.457973   1.733497   2.395108   5.379483     5 a   -->
+<!--          o1-mini  5.968378   6.551901   7.945925   7.506522   9.759592   9.943231     5 a   -->
