@@ -3,7 +3,7 @@ library(tidyverse)
 library(tidychatmodels)
 
 # Note: Before starting, ensure to install Ollama (https://ollama.com), and use
-# the terminal to download the model you wish to use. Here, we use llama3.1.
+# the terminal to download the model you wish to use. Here, we use llama3.2.
 
 # Sample description (artificially created)
 x <- "
@@ -77,7 +77,7 @@ Further instructions:
 # Function to clean the descriptions
 clean_desc <- function(caption) {
   create_chat("ollama") |>
-    add_model("llama3.1") |>
+    add_model("llama3.2") |>
     add_message(paste0(the_prompt, caption)) |>
     perform_chat() |>
     extract_chat(silent = TRUE) |>
@@ -87,7 +87,7 @@ clean_desc <- function(caption) {
 
 # Test Ollama works
 create_chat("ollama") |>
-  add_model("llama3.1") |>
+  add_model("llama3.2") |>
   add_message("Hello, how are you?") |>
   perform_chat() |>
   extract_chat()
