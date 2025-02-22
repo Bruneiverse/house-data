@@ -1,0 +1,21 @@
+---
+title: 'Review of "Random Item Response Data Generation Using a Limited-
+Information Approach: Applications to Assessing Model
+Complexity"'
+subtitle: 'Response to reviewers'
+date: today
+format: 
+  pdf:
+    papersize: a4
+    colorlinks: true
+    citecolor: blue
+    link-citations: true
+bibliography: ../../refs-HJ.bib
+csl: ../../data-in-brief.csl
+---
+
+## Reviewer 1
+
+## Reviewer 2
+
+## References
