@@ -1,10 +1,10 @@
 ---
-title: "From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam"
+title: 'From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam'
 authors:
   - name: Haziq Jamil
     orcid: 0000-0003-3298-1010
     email: haziq.jamil@ubd.edu.bn
-    url: "https://haziqj.ml"
+    url: 'https://haziqj.ml'
     corresponding: true
     affiliations:
       - name: Universiti Brunei Darussalam
