@@ -132,7 +132,7 @@ hsp |>
   ) |>
   summarise(
     count = n(),
-    spatial = length(unique(mukim)) / nrow(bruneimap::mkm_sf),
+    spatial = length(unique(mukim)) / length(unique(hsp$mukim)),
     # price = sum(missing_price),
     type = sum(missing_type),
     house_char = sum(missing_housechar),
@@ -142,7 +142,7 @@ hsp |>
   mutate(
     `nat-archive` = map_chr(source, ~ ifelse("nat-archive" %in% .x, "✔", "")),
     `online-archive` = map_chr(source, ~ ifelse("online-archive" %in% .x, "✔", "")),
-    `web-scrape` = map_chr(source, ~ ifelse("web-scrape" %in% .x, "✔", "")),
+    `web-scrape` = map_chr(source, ~ ifelse("web-scrape" %in% .x | "web-scrape-llm" %in% .x, "✔", "")),
     llm = map_chr(source, ~ ifelse("web-scrape-llm" %in% .x, "✔", ""))
   ) |> 
   select(-source) |>
@@ -184,7 +184,7 @@ hsp |>
     )
   ) |>
   tab_footnote(
-    footnote = paste0("Total number of mukims in Brunei = ", nrow(bruneimap::mkm_sf), "."),
+    footnote = paste0("Of Brunei’s 39 mukims, only 27 are considered transactable—excluding water villages and remote, non-developable areas."),
     locations = cells_column_labels(columns = spatial)
   ) |>
   tab_footnote(
@@ -314,15 +314,15 @@ hsp_rppi |>
   ) +
   geom_text(
     data = tibble(
-      quarter = c(2024.3, 2024.3),
+      quarter = c(2024.3 + 0.25, 2024.3 + 0.25),
       series = c("index", "rppi"),
-      value = c(0.941, 0.955),
+      value = c(0.941, 0.955) - 0.02,
       label = c("Median PPSF", "RPPI (BDCB)")
     ),
     aes(label = label),
     hjust = 0
   ) +
-  coord_cartesian(xlim = c(2015, 2025.5))
+  coord_cartesian(xlim = c(2015, 2025.75))
 ```
 
 ## LLM Test

@@ -24,10 +24,16 @@ authors:
     orcid: 0000-0003-1681-0895
     email: lutfi.razak@ubd.edu.bn
     affiliations:
-      - ref: ubd              
+      - name: UBD School of Business and Economics
+        id: ubdsbe
+        # department: Mathematical Sciences, Faculty of Science
+        address: Universiti Brunei Darussalam, Jalan Tungku Link
+        city: Bandar Seri Begawan
+        country: Brunei
+        postal-code: BE 1410         
 date-modified: last-modified
 abstract: |
-  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering 31,495 property listings from 1993 to 2024. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as missing values and spatial coverage bias toward the Brunei-Muara district, this data set provides a robust foundation for exploring housing market trends and informing policy decisions.
+  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering 32,104 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as missing values and spatial coverage bias toward the Brunei-Muara district, this data set provides a robust foundation for exploring housing market trends and informing policy decisions.
 keywords:
   - Housing Market
   - Brunei
@@ -290,9 +296,11 @@ This is explained in the next subsection.
 
 As previously mentioned, the web scraping process also captured unstructured information from the property descriptions, which often contained valuable details not captured in the primary fields. 
 In this subsection, we detail the data cleaning process using a pre-trained large language model (LLM) to extract structured information from the unstructured text. 
-The LLM used was Llama 3.1 with 8B parameters [@grattafiori2024llama], accessed using the `{tidychatmodels}` R package [@rapp2024tidychatmodels] via the Ollama[^1] API, a local interface platform to the LLM.
+The LLM used was the cloud-based OpenAI o1-mini reasoning model[^1], accessed using the `{ellmer}` R package [@wickham2025ellmer] via an API.
+<!-- The LLM used was a DeepSeek R1 distilled Qwen 14B [@deepseek2025deepseekr1;@qwen2025qwen25], accessed using the `{ellmer}` R package [@wickham2025ellmer] via the Ollama[^2] API, a local interface platform to the LLM. -->
 
-[^1]: <https://github.com/ollama/ollama>
+[^1]: <https://openai.com/index/openai-o1-mini-advancing-cost-efficient-reasoning/>
+[^2]: <https://github.com/ollama/ollama>
 
 The primary goal was to extract the house characteristics of interest, specifically variables 7 to 15 as per @tbl-codebook, from the unstructured verbose descriptions scraped from property listing websites. 
 Each description was processed with a carefully designed prompt (@fig-llm-prompt) to ensure consistent output. 
@@ -348,17 +356,27 @@ The LLM prompt to clean descriptions obtained from web scraping.
 :::
 
 The verbose descriptions were fed into the model one at a time using a loop, with the LLM extracting and returning the relevant details. 
-Note that this loop was not parallelised due to the computational resources required by the LLM. 
+Note that this loop was not parallelised, as the LLM already utilises multiple cores, and further parallelisation would not yield significant efficiency gains due to resource constraints.
 The cleaned results were then parsed and stored in a data frame, which was then subjected to manual data-type validation to ensure conformity with the existing data set. 
-It takes, on average, 2.12 seconds to process a single description running on Apple MacBook Air M2 Silicon on Chip (SoC) and System in Chip (SiP) processors with 16GB RAM. 
-We processed 4,820 descriptions in total from 2020 to 2024 using this method, with a runtime of approximately three hours.
+We processed 5,429 descriptions in total from 2020 to 2025 using this method.
+It takes, on average, 7.51 seconds to process a single description.
 
-To test the accuracy of the LLM, a random sample of 329 descriptions was selected and manually verified for correctness. 
-Of these, 306 were deemed correct (correct entries or identified "non-listings" correctly), resulting in an accuracy rate of 93.0%. 
-Rare errors were spotted due to model hallucinations (despite setting the LLM temperature to the lowest setting), but these are typically minor and unlikely to significantly impact the overall analysis. 
-Large errors on the other hand were corrected manually, by filtering for outliers (values exceeding three standard deviations from the mean in magnitude) or inconsistencies in the variables. 
-Overall, the LLM was found to be a valuable tool for extracting structured information from unstructured text, significantly reducing the time and effort required for data cleaning. 
-Users may wish to exclude these records from their analysis if they are concerned about the accuracy of the extracted data.
+To test the accuracy of the LLM data extraction, a test data set of 100 artificially generated descriptions was created, with each description written in the style of a typical property listing.
+The test data also contained missing information in selected property characteristics, which the LLM was expected to handle correctly.
+For each house characteristic, the accuracy of the LLM was calculated by comparing the extracted value to the ground truth.
+For numeric variables, values were considered accurate if they fell within 2% of the corresponding ground truth value. 
+For character variables, accuracy was determined using the normalized Levenshtein distance, ensuring differences remained within a set threshold. 
+Missing values were counted as correct if both the extracted and ground truth values were missing. 
+Accuracy was then averaged both per characteristic and across all characteristics.
+
+Our experiments show that the LLM data extraction process achieved an overall accuracy rate of 98.2%.
+Errors mostly stemmed from incorrect status classification, most likely due to the vagueness of the descriptions.
+In fact, excluding the `status` variable and the `location` variable, which will be processed further, the accuracy rate increases to 99.1%.
+
+In conclusion, we found the LLM to be a valuable tool for extracting structured information from unstructured text, significantly reducing the time and effort required for data cleaning.
+Large errors were still able to be corrected manually, by filtering for outliers (values exceeding three standard deviations from the mean in magnitude) or inconsistencies in the variables, which may be a result of model hallucinations.
+We note that the data cleaning procedure may also be run on local hardware, for example using the Ollama[^2] API, a local interface platform to the LLM.
+See the appendix for further details.
 
 ## Spatial Data Harmonisation
 
@@ -450,23 +468,25 @@ The authors declare that they have no known competing financial interests or per
 ## LLM Accuracy Test
 
 To test the accuracy of the LLM data cleaning, we created a test data set of 100 house advertisements in the style of the web scraped data.
-Several popular models from Ollama were used, namely the Llama 3.2 (3B), Mistral (7B), Phi4 (14B), and DeepSeek-R1 distilled reasoning models based on Llama (8B) and Qwen (14B).
+Several popular models from Ollama were used, namely the Llama3.2 (3B), Mistral (7B), Phi 4 (14B), and DeepSeek-R1 distilled reasoning models based on Llama (8B) and Qwen (14B).
 Additionally, two models from OpenAI were included for comparison. 
 These were the GPT-4o and the o1-mini, with the latter being a reasoning model.
 
-The metric used to assess accuracy is a similarity measure within a tolerance of 1% of the true value. 
-For numeric variables, the absolute difference is used.
-For non-numeric variables, the normalised Levenshtein distance is used.
-The code to replicate the analysis is available on the GitHub repository.
+<!-- The metric used to assess accuracy is a similarity measure within a tolerance of 1% of the true value.  -->
+<!-- For numeric variables, the absolute difference is used. -->
+<!-- For non-numeric variables, the normalised Levenshtein distance is used. -->
+<!-- The code to replicate the analysis is available on the GitHub repository. -->
 
 The results show that reasoning models outperform the non-reasoning models, with OpenAI's o1-mini model performing the best (98.2% accuracy) followed by the locally run deepseek-r1:14b Ollama model (92.5% accuracy).
-Most inaccuracies are seen in the `status` variable, where the models had a difficult time parsing the correct build status from the advertisement.
+Most inaccuracies are seen in the `status` variable, where the models had a difficult time parsing the correct build status from the vague verbose advertisement.
 However, key variables such as `price`, `type`, `plot_area`, `floor_area`, `beds`, and `baths` are generally reliable (>90% accuracy).
 
 {{< embed analysis.qmd#fig-llmtest >}}
 
 The run time statistics for each model is shown in the table below.
+The computer used Apple MacBook Air M2 Silicon on Chip (SoC) and System in Chip (SiP) processors with 16GB RAM.
 Running OpenAI's models are much faster than running models locally, though a paid API key is required.
+Faster local running times are, of course, a function of compute power.
 
 ```{r}
 #| label: tbl-llmtest-time

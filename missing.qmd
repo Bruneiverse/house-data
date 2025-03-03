@@ -25,7 +25,7 @@ For simplicity, we focus on the year 2024 and houses in the Brunei-Muara distric
 ```{r}
 hsp24 <- 
   hsp |>
-  filter(year(date) == 2024, district == "Brunei Muara") |>
+  filter(year(date) == 2024, district == "Brunei-Muara") |>
   select(price, mukim, plot_area, floor_area, beds, baths)
 glimpse(hsp24)
 ```

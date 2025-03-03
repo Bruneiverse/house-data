@@ -7,7 +7,7 @@ library(GGally)
 
 # Main data set
 hsp <- 
-  read_csv("data/hspbn_2024-12-12.csv") |>
+  read_csv("data/hspbn_2025-03-03.csv") |>
   mutate(
     type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
                                    "Apartment", "Land")),
