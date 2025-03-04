@@ -358,7 +358,7 @@ The LLM prompt to clean descriptions obtained from web scraping.
 The verbose descriptions were fed into the model one at a time using a loop, with the LLM extracting and returning the relevant details. 
 Note that this loop was not parallelised, as the LLM already utilises multiple cores, and further parallelisation would not yield significant efficiency gains due to resource constraints.
 The cleaned results were then parsed and stored in a data frame, which was then subjected to manual data-type validation to ensure conformity with the existing data set. 
-It takes, on average, 41.1 seconds to process a single description using a Mac Pro 3.2GHz 16 core Intel Xeon W.
+It takes, on average, 81.7 seconds to process a single description using a Mac Pro 3.2GHz 16 core Intel Xeon W.
 We processed 5,429 descriptions in total from 2020 to 2025 using this method, with a run time of approximately 20 hours in total (spread over 3 machines).
 
 To evaluate the accuracy of the LLM data extraction, a test data set of 100 artificially generated descriptions was created, with each description written in the style of a typical property listing.
@@ -474,7 +474,7 @@ These were the GPT-4o and the o1-mini, with the latter being a reasoning model.
 <!-- For non-numeric variables, the normalised Levenshtein distance is used. -->
 <!-- The code to replicate the analysis is available on the GitHub repository. -->
 
-The results show that reasoning models outperform the non-reasoning models, with OpenAI's o1-mini model performing the best (98.2% accuracy) followed by the locally run deepseek-r1:14b Ollama model (92.5% accuracy).
+The results show that reasoning models outperform the non-reasoning models, with OpenAI's o1-mini model performing the best (99.2% accuracy) followed by the locally run deepseek-r1:14b Ollama model (96.9% accuracy).
 Most inaccuracies are seen in the `status` variable, where the models had a difficult time parsing the correct build status from the vague verbose advertisement.
 However, key variables such as `price`, `type`, `plot_area`, `floor_area`, `beds`, and `baths` are generally reliable (>90% accuracy).
 
@@ -491,10 +491,10 @@ Faster local running times are, of course, a function of compute power.
 llmtest_time <-
   tibble(
     model = c("llama3.2", "mistral", "phi4", "deepseek-r1:8b", "deepseek-r1:14b", "gpt-4o", "o1-mini"),
-    min = c(4.705968, 2.695677, 7.763636, 49.028515, 70.27092, 1.279267, 5.968378),
-    mean = c(6.136084, 8.385252, 21.278234, 77.494729, 122.0068, 2.457973, 7.945925),
-    median = c(6.278579, 9.302804, 25.710515, 69.055948, 81.71249, 1.733497, 7.506522),
-    max = c(7.830766, 13.328297, 28.309253, 138.477761, 283.8539, 5.379483, 9.943231)
+    min = c(1.077457, 2.661627, 3.722881, 36.829881, 40.8939, 1.279267, 5.968378),
+    mean = c(6.396146, 10.437078, 14.108101, 65.973720, 117.666112, 2.457973, 7.945925),
+    median = c(9.595035, 2.907932, 4.267815, 54.605889, 81.71249, 1.733497, 7.506522),
+    max = c(10.16348, 22.21225, 38.01499, 112.77667, 151.2027, 5.379483, 9.943231)
   )
 
 gt(llmtest_time) |>
@@ -513,11 +513,12 @@ gt(llmtest_time) |>
 ```
 
 <!-- Unit: seconds -->
-<!--             expr       min         lq       mean     median         uq        max neval cld -->
-<!--         llama3.2  4.705968   5.343346   6.136084   6.278579   6.521761   7.830766     5 a   -->
-<!--          mistral  2.695677   4.423615   8.385252   9.302804  12.175866  13.328297     5 a   -->
-<!--             phi4  7.763636  17.141029  21.278234  25.710515  27.466739  28.309253     5 a   -->
-<!--   deepseek-r1:8b 49.028515  53.375558  77.494729  69.055948  77.535864 138.477761     5  b  -->
-<!--  deepseek-r1:14b 97.197804 119.387742 146.424187 149.651830 153.784741 212.098819     5   c -->
+ <!--            expr       min         lq       mean     median         uq       max neval -->
+ <!--        llama3.2  1.077457   1.168078   6.396146   9.595035   9.881765  10.16348    10 -->
+ <!--         mistral  2.661627   2.854717  10.437078   2.907932  21.778689  22.21225    10 -->
+ <!--            phi4  3.722881   3.925309  14.108101   4.267815  36.986746  38.01499    10 -->
+ <!--  deepseek-r1:8b 36.829881  46.254848  65.973720  54.605889  85.101693 112.77667    10 -->
+ <!-- deepseek-r1:14b 59.400884   74.62474 117.666112  81.71249   99.57201  283.8539  10 -->
+ <!-- deepseek-r1:14b 40.8939 67.19222 127.0108 93.09138 151.2027 541.1301   100 -->
 <!--           gpt-4o  1.279267   1.502509   2.457973   1.733497   2.395108   5.379483     5 a   -->
 <!--          o1-mini  5.968378   6.551901   7.945925   7.506522   9.759592   9.943231     5 a   -->
