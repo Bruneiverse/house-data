@@ -10,6 +10,6 @@
 *_files/*
 *_cache/*
 
-*/*_freeze/*
-*/*_files/*
-*/*_cache/*
+notebooks/*_freeze/*
+notebooks/*_files/*
+notebooks/*_cache/*
