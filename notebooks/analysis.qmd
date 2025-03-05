@@ -305,7 +305,7 @@ hsp_rppi |>
     format = "%Y-Q%q", 
     expand = c(0, 0.1),
     name = NULL, 
-    breaks = seq(2015, 2024.5, by = 0.25)
+    breaks = seq(2015, 2024.75, by = 0.25)
   ) +
   theme_bw() +
   theme(
@@ -329,10 +329,10 @@ hsp_rppi |>
 
 ```{r}
 #| label: fig-llmtest
-#| fig-cap: Model accuracy comparison using the LLM test data set.
+#| fig-cap: Comparison of data extraction accuracy across multiple LLM models on the test dataset. Each bar represents the percentage of correctly extracted fields for a given model.
 #| fig-height: 4.5
 #| fig-width: 9
 #| out-width: 100%
-load("experiments/llm_test.RData")
+load(here::here("experiments/llm_test.RData"))
 p_llm_test
 ```

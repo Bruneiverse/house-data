@@ -33,7 +33,7 @@ authors:
         postal-code: BE 1410         
 date-modified: last-modified
 abstract: |
-  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering 32,104 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as missing values and spatial coverage bias toward the Brunei-Muara district, this data set provides a robust foundation for exploring housing market trends and informing policy decisions.
+  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering 31,150 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as missing values and spatial coverage bias toward the Brunei-Muara district, this data set provides a robust foundation for exploring housing market trends and informing policy decisions.
 keywords:
   - Housing Market
   - Brunei
@@ -46,7 +46,7 @@ keywords:
 ```{r}
 #| include: false
 #| eval: true 
-#| file: data.R
+#| file: notebooks/data.R
 ```
 
 ```{r}
@@ -163,13 +163,13 @@ The method variable details the data collection approach, which is further elabo
 
 :::: {.content-visible when-format="html"}
 ::: column-page
-{{< embed analysis.qmd#tbl-summary >}}
+{{< embed notebooks/analysis.qmd#tbl-summary >}}
 :::
 ::::
 
 :::: {.content-visible unless-format="html"}
 ::: landscape
-{{< embed analysis.qmd#tbl-summary >}}
+{{< embed notebooks/analysis.qmd#tbl-summary >}}
 :::
 ::::
 
@@ -186,7 +186,7 @@ In our data set, each property listing is associated with a specific kampong, mu
 Importantly, the names of the kampongs, mukims, and districts have been harmonised with a standardised naming convention to ensure consistency across the data set. 
 This also allows for ease of integration into Geographic Information Systems (GIS) software for spatial analysis and visualisation, namely the `{bruneimap}` R package [@jamil2024bruneimap].
 
-{{< embed analysis.qmd#fig-spatial >}}
+{{< embed notebooks/analysis.qmd#fig-spatial >}}
 
 ## Listing Dates
 
@@ -197,7 +197,7 @@ Users should set their expectations accordingly, as the primary purpose of the d
 For analysis, we recommend aggregating data by quarters, as represented by the quarter variable. 
 This aggregation helps address potential issues like missing data (see subsection below) and provides a more stable and robust representation of market trends, making it suitable for temporal analysis of the housing market.
 
-{{< embed analysis.qmd#fig-price-evolution >}}
+{{< embed notebooks/analysis.qmd#fig-price-evolution >}}
 
 ## Missing Values
 
@@ -221,7 +221,7 @@ For the later years, a large language model (LLM) was also employed to perform d
 
 All analyses were conducted using the R programming language [@rcoreteam2024language], with specific packages used described in each subsection below.
 
-{{< embed analysis.qmd#tbl-avail >}}
+{{< embed notebooks/analysis.qmd#tbl-avail >}}
 
 ## Manual Data Collection
 
@@ -472,7 +472,7 @@ The authors declare that they have no known competing financial interests or per
 
 ## Pairwise Correlation Plot of Numeric Variables
 
-{{< embed analysis.qmd#fig-corr >}}
+{{< embed notebooks/analysis.qmd#fig-corr >}}
 
 ## Comparison to RPPI Data
 
@@ -482,7 +482,7 @@ This approach minimises the impact of missing values, as the index is based on a
 @fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our data set. 
 The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a good level of agreement between the two data sets.
 
-{{< embed analysis.qmd#fig-rppi >}}
+{{< embed notebooks/analysis.qmd#fig-rppi >}}
 
 ## LLM Accuracy Test {#sec-apx-llm}
 
@@ -495,7 +495,7 @@ The results show that reasoning models outperform the non-reasoning models, with
 Most inaccuracies are seen in the `status` variable, where the models had a difficult time parsing the correct build status from the vague verbose advertisement.
 However, key variables such as `price`, `type`, `plot_area`, `floor_area`, `beds`, and `baths` are generally reliable (>90% accuracy).
 
-{{< embed analysis.qmd#fig-llmtest >}}
+{{< embed notebooks/analysis.qmd#fig-llmtest >}}
 
 The run time statistics for each model is shown in the table below.
 The computer used Apple MacBook Air M2 Silicon on Chip (SoC) and System in Chip (SiP) processors with 16GB RAM.

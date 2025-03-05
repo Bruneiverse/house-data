@@ -4,10 +4,11 @@ library(gt)
 library(gtsummary)
 library(lubridate)
 library(GGally)
+here::i_am("notebooks/data.R")
 
 # Main data set
 hsp <- 
-  read_csv("data/hspbn_2025-03-03.csv") |>
+  read_csv(here::here("data/hspbn_2025-03-03.csv")) |>
   mutate(
     type = factor(type, levels = c("Detached", "Semi-Detached", "Terrace",
                                    "Apartment", "Land")),
@@ -19,7 +20,7 @@ hsp <-
 
 # RPPI from BDCB
 rppi <- 
-  read_csv("data/rppi.csv") |>
+  read_csv(here::here("data/rppi.csv")) |>
   mutate(
     quarter = zoo::as.yearqtr(quarter),
     rppi = rppi / 100
