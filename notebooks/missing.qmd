@@ -131,3 +131,21 @@ plot_pattern(datB, square = !TRUE, rotate = !TRUE)
 ```
 
 Some patterns are there, but some are not. This is expected when some of the missing patterns are rare.
+
+## Main article
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-missing-pattern
+#| fig-cap: Missing data patterns for key house characteristics.
+#| out-width: 100%
+#| fig-width: 9
+#| fig-height: 4
+hsp |>
+  dplyr::select(price, plot_area, floor_area, beds, baths) |>
+  plot_pattern(npat = 16) +
+  coord_flip() +
+  theme(aspect.ratio = 0.3)
+```
