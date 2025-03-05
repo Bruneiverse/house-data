@@ -33,7 +33,7 @@ authors:
         postal-code: BE 1410         
 date-modified: last-modified
 abstract: |
-  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering 31,150 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. While minor limitations exist, such as missing values and spatial coverage bias toward the Brunei-Muara district, this data set provides a robust foundation for exploring housing market trends and informing policy decisions.
+  This article introduces the first publicly available data set for analyzing the Brunei housing market, covering more than 30,000 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative cleaning with Large Language Models (LLMs) to structure unformatted text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. Although listing prices serve only as a proxy for market values and may deviate from actual sale prices due to negotiation dynamics and other factors, this data set still provides a valuable resource for reproducible analysis of housing market trends and for informing policy decisions.
 keywords:
   - Housing Market
   - Brunei
@@ -70,11 +70,11 @@ max(years) - min(years) + 1
 
 - **Historical and spatial insights**. Spanning over three decades, this data set allows for the study of long-term housing trends in Brunei. The spatial information available enables analysis at various administrative levels, providing insights into urban development patterns, regional differences, and the evolution of housing characteristics over time. This historical depth is particularly valuable given the lack of previous data before the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
 
-- **Methodological innovation in data curation**. The data collection process employs a unique combination of manual transcription from archival sources, automated web scraping, and AI-based data cleaning using Large Language Models (LLMs). This open source and multi-method approach enhances reproducibility and transparency in data curation. The present work provides a reproducible framework for assembling complex datasets, which can be adapted for similar data collection efforts in other other domains, thereby advancing best practices in the field.
+- **Methodological innovation in data curation**. The data collection process employs a unique combination of manual transcription from archival sources, automated web scraping, and AI-based data cleaning using Large Language Models (LLMs). This open source and multi-method approach enhances reproducibility and transparency in data curation. The present work provides a reproducible framework for assembling complex data sets, which can be adapted for similar data collection efforts in other other domains, thereby advancing best practices in the field.
 
 <!-- - **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI can potentially play a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, providing guidance to the central bank decisions. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s House Price Index developed by Rightmove PLC [@hmlandregistry2023comparing; @europeancommission.eurostat2013handbook]. This data set demonstrates how computational methods can automate what is typically a time-consuming and labour-intensive process. -->
 
-- **Opportunities for handling of missing data**. The dataset includes instances of missing or inconsistent data, particularly in house characteristics, which present opportunities for further research on data imputation techniques. Researchers may explore advanced statistical and machine learning methods to address missing values and improve data reliability. The structured format and detailed documentation of the dataset support such methodological investigations, making it a valuable testbed for developing and evaluating new approaches to handling incomplete data in real-world datasets.
+- **Opportunities for handling of missing data**. The data set includes instances of missing or inconsistent data, particularly in house characteristics, which present opportunities for further research on data imputation techniques. Researchers may explore advanced statistical and machine learning methods to address missing values and improve data reliability. The structured format and detailed documentation of the data set support such methodological investigations, making it a valuable testbed for developing and evaluating new approaches to handling incomplete data in real-world data sets.
 
 <!-- - **Application of Large Language Models (LLMs)**. This project highlights an innovative use of Large Language Models (LLMs) for data cleaning. The LLM was employed to extract structured information from unstructured text descriptions with great accuracy. This method significantly reduced the time and effort required for data cleaning. It can also be applied to other data sets with unstructured text, such as social media or document archives, to extract valuable information for analysis. -->
 
@@ -161,15 +161,71 @@ Finally, metadata about the property is included for transparency and informatio
 The variable agent specifies the (anonymised) identifier of the real estate agent or agency responsible for the listing, while source identifies the platform or medium from which the listing was obtained, such as a newspaper, magazine, or website. 
 The method variable details the data collection approach, which is further elaborated in the section below.
 
+```{r}
+#| include: false
+tbl_summary <- 
+  hsp |>
+  mutate(
+    price = price / 1000,
+    storeys = factor(
+      ifelse(storeys >= 3, "3+", as.character(storeys)),
+      levels = c("1", "2", "3+")
+    ),
+    district = gsub("Brunei Muara", "Brunei-Muara", district),
+    district = factor(district, levels = c("Brunei-Muara", "Belait", "Tutong", "Temburong"))
+  ) |>
+  tbl_summary(
+    include = c(price:baths),
+    by = district,
+    missing = "no", 
+    type = all_continuous() ~ "continuous2",
+    statistic = list(
+      all_continuous2() ~ c("{mean} ({sd})", Range = "{min} - {max}", "{median} ({p25}, {p75})")
+    ),
+    label = list(
+      price = "Price (BND 1,000)",
+      type = "Property type",
+      plot_area = "Plot area (acres)",
+      floor_area = "Floor area (sq. ft.)",
+      storeys = "Number of storeys",
+      status = "Development status",
+      tenure = "Land tenure",    
+      beds = "Number of bedrooms",
+      baths = "Number of bathrooms"
+    ),
+    digits = list(
+      baths = 1,
+      beds = 1
+    )
+  ) |>
+  add_overall() |>
+  add_n() |>
+  modify_header(label ~ "**Variable**") |>
+  as_gt()
+```
+
 :::: {.content-visible when-format="html"}
 ::: column-page
-{{< embed notebooks/analysis.qmd#tbl-summary >}}
+::: {#tbl-summary}
+```{r}
+#| html-table-processing: none
+tbl_summary
+```
+Summary of housing data.
+:::
 :::
 ::::
 
 :::: {.content-visible unless-format="html"}
 ::: landscape
-{{< embed notebooks/analysis.qmd#tbl-summary >}}
+::: {#tbl-summary}
+```{r}
+#| html-table-processing: none
+tbl_summary |>
+  tab_options(table.font.size = "9px")
+```
+Summary of housing data.
+:::
 :::
 ::::
 
@@ -400,7 +456,7 @@ These checks include
 
 3.	**Duplicate records detection.** We also performed duplicate record detection to identify any repeated entries that might have arisen from overlapping data sources or transcription errors. Any duplicates that were identified were carefully reviewed and removed to ensure that each property listing was uniquely represented in the span of one calendar month.
 
-These data validation procedures collectively contribute to a robust and reliable dataset, providing a solid foundation for subsequent analysis.
+These data validation procedures collectively contribute to a robust and reliable data set, providing a solid foundation for subsequent analysis.
 
 # Limitations
 
