@@ -36,7 +36,7 @@ location <-
 
 # Put it all in a data frame
 hsp_df <- tibble(
-  location = location
+  location = location,
   price = prices,
   beds = beds,
   baths = baths,
