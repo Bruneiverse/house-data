@@ -3,8 +3,8 @@
 
 <!-- badges: start -->
 ![](https://img.shields.io/badge/brunei-yakin-yellow)
-![GitHub Release](https://img.shields.io/github/v/release/Bruneiverse/house-data)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14978544-blue)](https://doi.org/10.5281/zenodo.14978544)
+[![GitHub Release](https://img.shields.io/github/v/release/Bruneiverse/house-data?color=white)](https://github.com/Bruneiverse/house-data/releases)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14978544-black?color=black)](https://doi.org/10.5281/zenodo.14978544)
 <!-- badges: end -->
 
 This repository contains the source code and data to produce the Data in Brief article entitled "From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam".
