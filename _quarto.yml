@@ -1,6 +1,6 @@
 project:
   type: manuscript
-  # output-dir: docs
+  output-dir: docs
   post-render:
     - _cleanup.R
   

@@ -16,7 +16,7 @@ for (file in files_to_remove) {
 # Fix the alignment of tfoot in the Quarto-generated HTML
 
 # Path to the HTML file
-html_file <- "_manuscript/index.html"
+html_file <- "docs/index.html"
 
 # Check if the file exists
 if (file.exists(html_file)) {
@@ -39,7 +39,7 @@ if (file.exists(html_file)) {
 
 # Copy over the docx manuscript
 source_file <- "_submission/Revision 1/article_rev1.docx"
-destination_file <- "_manuscript/jamil2025archives.docx"
+destination_file <- "docs/jamil2025archives.docx"
 
 # Copy the file, replacing the destination if it exists
 file.copy(source_file, destination_file, overwrite = TRUE)
