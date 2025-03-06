@@ -1,5 +1,5 @@
 ---
-title: Data Cleaning using LLM
+title: Data Extraction using LLM
 author: Haziq Jamil
 page-layout: full
 grid:
