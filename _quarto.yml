@@ -42,7 +42,7 @@ format:
 execute:
   # echo: false
   cache: true
-  freeze: auto
+  # freeze: auto
   warning: false
   code-overflow: wrap
 
