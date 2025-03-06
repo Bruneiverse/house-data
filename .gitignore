@@ -5,6 +5,9 @@
 .DS_Store
 .quarto
 
+docs/
+_manuscript/
+
 /.quarto/
 *_freeze/*
 *_files/*
