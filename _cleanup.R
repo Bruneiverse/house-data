@@ -1,6 +1,6 @@
 # Cleanup script for Quarto
 files_to_remove <- list.files(
-  pattern = "\\.(bst|spl|cls|ipynb)$"
+  pattern = "\\.(bst|spl|cls|ipynb|DS_Store)$"
 )
 
 # Iterate over files and delete them if they exist
