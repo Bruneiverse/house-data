@@ -41,6 +41,8 @@ keywords:
   - Spatial Data
   - Web Scraping
   - Large Language Models
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -68,7 +70,7 @@ max(years) - min(years) + 1
 
 - **Historical and spatial insights**. Spanning over three decades, this data set enables analysis of long-term housing trends at various administrative levels in Brunei, providing insights into urban development patterns, regional differences, and the evolution of housing characteristics over time. This historical depth is particularly valuable given the lack of data prior to the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
 
-- **Methodological innovation in data curation**. The data collection process employs a unique combination of manual transcription from archival sources, automated web scraping, and AI-based data cleaning using Large Language Models (LLMs). This multi-method approach offers a reproducible framework for assembling complex data sets, which can be adapted for similar data collection efforts in other other domains, thereby advancing best practices in the field.
+- **Methodological innovation in data curation**. The data collection process employs a unique combination of manual transcription from archival sources, automated web scraping, and AI-based data cleaning using Large Language Models (LLMs). This multi-method approach offers a reproducible framework for assembling complex data sets, which can be adapted for similar data collection efforts in other domains, thereby advancing best practices in the field.
 
 <!-- - **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI can potentially play a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, providing guidance to the central bank decisions. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s House Price Index developed by Rightmove PLC [@hmlandregistry2023comparing; @europeancommission.eurostat2013handbook]. This data set demonstrates how computational methods can automate what is typically a time-consuming and labour-intensive process. -->
 
