@@ -10,10 +10,10 @@ manuscript:
     - repo
     - text: Web Scraping House Data
       icon: code
-      href: webscrape.R
-    - text: Data Cleaning using LLM
+      href: notebooks/webscrape.R
+    - text: Data Extraction using LLM
       icon: code
-      href: llm.R
+      href: notebooks/llm.R
 
 format:
   html: 
