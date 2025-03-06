@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="generator" content="quarto-1.7.13">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <meta name="author" content="Haziq Jamil">
+
+    <title>Missing Data Patterns</title>
+    <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      div.columns{display: flex; gap: min(4vw, 1.5em);}
+      div.column{flex: auto; overflow-x: auto;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+        vertical-align: middle;
+      }
+      /* CSS for syntax highlighting */
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+        }
+      pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+    </style>
+
+    <style>
+      body.hypothesis-enabled #quarto-embed-header {
+        padding-right: 36px;
+      }
+
+      #quarto-embed-header {
+        height: 3em;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px;
+      }
+
+      #quarto-embed-header h6 {
+        font-size: 1.1em;
+        padding-top: 0.6em;
+        margin-left: 1em;
+        margin-right: 1em;
+        font-weight: 400;
+      }
+
+      #quarto-embed-header a.quarto-back-link,
+      #quarto-embed-header a.quarto-download-embed {
+        font-size: 0.8em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+      .quarto-back-container {
+        padding-left: 0.5em;
+        display: flex;
+      }
+
+      .headroom {
+          will-change: transform;
+          transition: transform 200ms linear;
+      }
+
+      .headroom--pinned {
+          transform: translateY(0%);
+      }
+
+      .headroom--unpinned {
+          transform: translateY(-100%);
+      }      
+    </style>
+
+    <script>
+    window.document.addEventListener("DOMContentLoaded", function () {
+
+      var header = window.document.querySelector("#quarto-embed-header");
+      const titleBannerEl = window.document.querySelector("body > #title-block-header");
+      if (titleBannerEl) {
+        titleBannerEl.style.paddingTop = header.clientHeight + "px";
+      }
+      const contentEl = window.document.getElementById('quarto-content');
+      for (const child of contentEl.children) {
+        child.style.paddingTop = header.clientHeight + "px";
+        child.style.marginTop = "1em";
+      }
+
+      // Use the article root if the `back` call doesn't work. This isn't perfect
+      // but should typically work
+      window.quartoBackToArticle = () => {
+        var currentUrl = window.location.href;
+        window.history.back();
+        setTimeout(() => {
+            // if location was not changed in 100 ms, then there is no history back
+            if(currentUrl === window.location.href){              
+                // redirect to site root
+                window.location.href = "../index.html";
+            }
+        }, 100);
+      }
+
+      const headroom = new window.Headroom(header, {
+        tolerance: 5,
+        onPin: function () {
+        },
+        onUnpin: function () {
+        },
+      });
+      headroom.init();
+    });
+    </script>
+
+    
+<script src="../site_libs/manuscript-notebook/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-66ab7fd5e73b7f0a764e0d49b3e29ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fb465d422994eb3252504be870f58722.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script> 
+      <meta name="citation_title" content="Missing Data Patterns">
+<meta name="citation_author" content="Haziq Jamil">
+<meta name="citation_publication_date" content="2025">
+<meta name="citation_cover_date" content="2025">
+<meta name="citation_year" content="2025">
+<meta name="citation_fulltext_html_url" content="https://github.com/Bruneiverse/house-data">
+<meta name="citation_language" content="en">
+<meta name="citation_journal_title" content="Manuscript in Submission">
+<meta name="citation_reference" content="citation_title=Ollama/ollama;,citation_abstract=Get up and running with Llama 3.3, Mistral, Gemma 2, and other large language models.;,citation_publication_date=2024-12;,citation_cover_date=2024-12;,citation_year=2024;,citation_publisher=Ollama;">
+<meta name="citation_reference" content="citation_title=Phi-4 Technical Report;,citation_abstract=We present phi-4, a 14-billion parameter language model developed with a training recipe that is centrally focused on data quality. Unlike most language models, where pre-training is based primarily on organic data sources such as web content or code, phi-4 strategically incorporates synthetic data throughout the training process. While previous models in the Phi family largely distill the capabilities of a teacher model (specifically GPT-4), phi-4 substantially surpasses its teacher model on STEM-focused QA capabilities, giving evidence that our data-generation and post-training techniques go beyond distillation. Despite minimal changes to the phi-3 architecture, phi-4 achieves strong performance relative to its size – especially on reasoning-focused benchmarks – due to improved data, training curriculum, and innovations in the post-training scheme.;,citation_author=Marah Abdin;,citation_author=Jyoti Aneja;,citation_author=Harkirat Behl;,citation_author=Sébastien Bubeck;,citation_author=Ronen Eldan;,citation_author=Suriya Gunasekar;,citation_author=Michael Harrison;,citation_author=Russell J. Hewett;,citation_author=Mojan Javaheripi;,citation_author=Piero Kauffmann;,citation_author=James R. Lee;,citation_author=Yin Tat Lee;,citation_author=Yuanzhi Li;,citation_author=Weishung Liu;,citation_author=Caio C. T. Mendes;,citation_author=Anh Nguyen;,citation_author=Eric Price;,citation_author=Gustavo Rosa;,citation_author=Olli Saarikivi;,citation_author=Adil Salim;,citation_author=Shital Shah;,citation_author=Xin Wang;,citation_author=Rachel Ward;,citation_author=Yue Wu;,citation_author=Dingli Yu;,citation_author=Cyril Zhang;,citation_author=Yi Zhang;,citation_publication_date=2024-12;,citation_cover_date=2024-12;,citation_year=2024;,citation_fulltext_html_url=https://arxiv.org/abs/2412.08905;,citation_doi=10.48550/arXiv.2412.08905;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=A pioneering study on measuring poverty in the hydrocarbon-rich state of Brunei Darussalam;,citation_abstract=Poverty exists not only in low and middle-income countries but also in high-income countries. Brunei, a rich country heavily reliant on hydrocarbon in Southeast Asia, is not an exception. Though poverty is not a topic that is politically taboo in Brunei, there are no statistics on poverty in Brunei. Yet, having such statistics would aid the government to achieve the target of zero poverty in 2035. Therefore, this technical paper provides a pioneering estimation of poverty rates in Brunei, utilising published data from “Household Expenditure Surveys” and focusing on the basic need approach. It calculates monthly household poverty rates based on the World Bank’s poverty lines and OECD median income approach. It produces poverty rates based on expenditure and income. The research employs two models: a proportional model and a refined model. The results show declining rates of poverty, regardless of the poverty lines and models.;,citation_author=Evi Nurvidya Arifin;,citation_author=Aris Ananta;,citation_author=Siti Fatimahwati Pehin Dato Musa;,citation_author=Chang-Yau Hoon;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_issue=0;,citation_doi=10.1080/17441730.2023.2240108;,citation_issn=1744-1730;,citation_volume=0;,citation_journal_title=Asian Population Studies;,citation_publisher=Routledge;">
+<meta name="citation_reference" content="citation_title=Technical Notes for Residential Property Price Index (RPPI);,citation_author=undefined BDCB;,citation_publication_date=2021-06;,citation_cover_date=2021-06;,citation_year=2021;,citation_technical_report_institution=Brunei Darussalam Central Bank;">
+<meta name="citation_reference" content="citation_title=PropTech: Turning Real Estate Into a Data-Driven Market?;,citation_author=Fabian Braesemann;,citation_author=Andrew Baum;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;,citation_doi=10.2139/ssrn.3607238;,citation_issn=1556-5068;,citation_language=en-US;,citation_journal_title=SSRN Electronic Journal;">
+<meta name="citation_reference" content="citation_title=DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning;,citation_abstract=We introduce our first-generation reasoning models, DeepSeek-R1-Zero and DeepSeek-R1. DeepSeek-R1-Zero, a model trained via large-scale reinforcement learning (RL) without supervised fine-tuning (SFT) as a preliminary step, demonstrates remarkable reasoning capabilities. Through RL, DeepSeek-R1-Zero naturally emerges with numerous powerful and intriguing reasoning behaviors. However, it encounters challenges such as poor readability, and language mixing. To address these issues and further enhance reasoning performance, we introduce DeepSeek-R1, which incorporates multi-stage training and cold-start data before RL. DeepSeek-R1 achieves performance comparable to OpenAI-o1-1217 on reasoning tasks. To support the research community, we open-source DeepSeek-R1-Zero, DeepSeek-R1, and six dense models (1.5B, 7B, 8B, 14B, 32B, 70B) distilled from DeepSeek-R1 based on Qwen and Llama.;,citation_author=DeepSeek-AI;,citation_publication_date=2025-01;,citation_cover_date=2025-01;,citation_year=2025;,citation_fulltext_html_url=https://arxiv.org/abs/2501.12948;,citation_doi=10.48550/arXiv.2501.12948;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=The big data regime shift in real estate;,citation_abstract=Purpose The paper explores the emergence of the “big data regime” and the disruption that it is causing for the real estate industry. The paper defines big data and illustrates how an inductive, big data approach can help improve decision-making. Design/methodology/approach The paper demonstrates how big data can support inductive reasoning that can lead to enhanced real estate decisions. To help readers understand the dynamics and drivers of the big data regime shift, an extensive list of hyperlinks is included. Findings The paper concludes that it is possible to blend traditional and non-traditional data into a unified data environment to support enhanced decision-making. Through the application of design thinking, the paper illustrates how socially responsible development can be targeted to under-served urban areas and helps serve residents and the communities in which they live. Research limitations/implications The paper demonstrates how big data can be harnessed to support decision-making using a hypothetical project. The paper does not present advanced analytics but focuses aggregating disparate longitudinal data that could support such analysis in future research. Practical implications The paper focuses on the US market, but the methodology can be extended to other markets where big data is increasingly available. Social implications The paper illustrates how big data analytics can be used to help serve the needs of marginalized residents and tenants, as well as blighted areas. Originality/value This paper documents the big data movement and demonstrates how non-traditional data can support decision-making.;,citation_author=James R. DeLisle;,citation_author=Brent Never;,citation_author=Terry V. Grissom;,citation_publication_date=2020-06;,citation_cover_date=2020-06;,citation_year=2020;,citation_issue=4;,citation_doi=10.1108/JPIF-10-2019-0134;,citation_issn=1463-578X;,citation_volume=38;,citation_language=en-US;,citation_journal_title=Journal of Property Investment &amp;amp;amp; Finance;">
+<meta name="citation_reference" content="citation_title=The Population and Housing Census Report (BPP) 2021: Demographic, Household and Housing Characteristics;,citation_author=undefined DEPS;,citation_publication_date=2022-10;,citation_cover_date=2022-10;,citation_year=2022;,citation_technical_report_institution=Department of Economic Planning and Statistics, Ministry of Finance and Economy, Brunei Darussalam;">
+<meta name="citation_reference" content="citation_title=Handbook on residential property prices indices (RPPIs).;,citation_author=European Commission. Eurostat;,citation_publication_date=2013;,citation_cover_date=2013;,citation_year=2013;,citation_language=en-US;">
+<meta name="citation_reference" content="citation_title=Cultural Consideration in Vertical Living in Brunei Darussalam Cultural Consideration in Vertical Living in Brunei Darussalam;,citation_abstract=The Government of Brunei Darussalam has played a central role in the provision of public housing in the form of landed property for many centuries. The period of modernity and economic growth has resulted in urban sprawl and declining available land. In a bid to arrest this unsustainable trend, the Government is promoting high-density, high-rise settlement complexes as an alternative to meet housing demands. The necessary legislation to support ownership of apartment units in multi-storey complexes, namely the Strata Title Act, has also been developed. The public, including real estate developers, however has not warmed to the initiative. Some analysts are of the view that there is a need to &amp;amp;amp;quot;re-engineer the Brunei society&amp;quot; to embrace vertical living via various means such as education and awareness. Nevertheless this paper will argue that the understanding and appreciation for Bruneians’ lifestyle as well as social and cultural proxemics are actually important for urban planners to consider. This study shows the different cultural typologies in Brunei which enabled the researchers to understand the cultural and social determinants that influences respondents’ choices with regards to the types and space preferences in relation to vertical housing. The paper puts forward a hypothesis that the Brunei society will warm up to vertical living if their cultural space needs are met in high-rise, high-density complexes. For the purpose of this study, a survey was conducted to validate the predictions of the model i.e. cultural architecture typology particularly targeting affected populations generated. The paper takes an insider-outsider approach which further emphasises the importance of local knowledge and understanding of local cultures and practices in research. It is hoped that the study will contribute to a better understanding of the housing demands of the Brunei society in general, and key cultural considerations with regards to vertical living in particular.;,citation_author=Noor Hasharina Hassan;,citation_author=Izni Azrein;,citation_author=Khairunnisa Ibrahim;,citation_author=Gabriel Yong;,citation_publication_date=2011-11;,citation_cover_date=2011-11;,citation_year=2011;,citation_conference_title=Managing Urban Growth: Challenges for Small Cities;">
+<meta name="citation_reference" content="citation_title=The Sociocultural Significance of Homeownership in Brunei Darussalam;,citation_abstract=Houses matter to Bruneians. However, there are varying values and meanings attached to a house depending on spatial and cultural differences, which influence people’s urgency to become homeowners. Governance, consumption patterns and sociocultural institutions shape how consumers value housing and influence their desire to become homeowners. This chapter suggests that Brunei Darussalam’s housing development and culture are unique compared to societies that have undergone significant financial liberalisation such as Britain and the United States. Financial liberalisation or financialisation involve governments reducing their restrictions on financial institutions and the financial markets. Based on qualitative research that involved 210 structured interviews, six in-depth interviews and secondary data, this study identifies the variables that influence the culture of homeownership in Brunei.;,citation_author=Noor Hasharina Hassan;,citation_editor=Lian Kwen Fee;,citation_editor=Paul J. Carnegie;,citation_editor=Noor Hasharina Hassan;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_doi=10.1007/978-981-19-6059-8_11;,citation_isbn=978-981-19-6059-8;,citation_language=en-US;,citation_inbook_title=(Re)presenting Brunei Darussalam: A Sociology of the Everyday;,citation_series_title=Asia in Transition;">
+<meta name="citation_reference" content="citation_title=Comparing house price indices in the UK;,citation_author=HM Land Registry;,citation_publication_date=2023-12;,citation_cover_date=2023-12;,citation_year=2023;,citation_language=en-US;,citation_technical_report_institution=HM Land Registry;">
+<meta name="citation_reference" content="citation_title=Bruneimap: Maps and Spatial Data of Brunei (R package version 0.3.1.9001);,citation_author=Haziq Jamil;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Leveraging Sparse Gaussian Processes for Property Price Modelling and Sustainable Urban Planning;,citation_author=Haziq Jamil;,citation_author=Fatin Usop;,citation_author=Huda M. Ramli;,citation_editor=Samsul Ariffin Abdul Karim;,citation_editor=Aslina Baharum;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_isbn=978-1-003-51839-6;,citation_inbook_title=Intelligent Systems of Computing and Informatics in Sustainable Urban Development;,citation_series_title=Intelligent Systems of Computing and Informatics;">
+<meta name="citation_reference" content="citation_title=A spatio-temporal analysis of house prices in Brunei Darussalam;,citation_abstract=This paper presents the first spatio-temporal analysis of property prices in Brunei Darussalam, a small, resource-rich economy with distinct housing market characteristics. Despite global interest in quantitative housing market analyses, Brunei’s market remains underexplored, with prior studies predominantly qualitative. Addressing this gap, $N=3,763$ residential transactions from 2015 to 2023 were analysed using Conditional Autoregressive (CAR) priors to model spatial dependencies and temporal trends in house prices accounting for other price determinants. Emerging Hotspot Analysis was then employed to classify price clustering across time. Key findings revealed significant spatial autocorrelation ($\rho = 0.43$) and temporal persistence best modeled by an autoregressive structure of order 2, indicating that market reactions to changes can extend up to six months. The results demonstrate the critical role of spatial and temporal factors in shaping property prices, providing actionable insights for policy interventions and real estate market analysis, particularly in addressing disparities between urban and rural housing markets.;,citation_author=Haziq Jamil;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_doi=10.13140/RG.2.2.32533.74720;,citation_language=en-US;">
+<meta name="citation_reference" content="citation_title=A Case of Homestays in Brunei as a Means of Socio-Economic Development;,citation_abstract=This paper aims to discuss how homestays in Brunei represents a means of socio-economic development. While recognizing the socio-economic benefits and revenue streams that homestays gain from not only providing accommodation facilities, the wide range of cultural activities and exposures will strengthen the preservation of Brunei’s cultural heritage. A case study approach and qualitative research method were conducted in this study. The key findings reveal that the community participation in three homestays is perceived to empower individuals in contributing on-going socio-economic development of their respective village. This study contributes knowledge and practical suggestions to potential ventures, homestay operators and researchers.;,citation_author=Siti Aisah Janaji;,citation_author=Fahmi Ibrahim;,citation_publication_date=2020-11;,citation_cover_date=2020-11;,citation_year=2020;,citation_issue=4;,citation_doi=10.31580/ijer.v3i4.1659;,citation_issn=2663-7588, 2663-757X;,citation_volume=3;,citation_journal_title=International Journal of Entrepreneurial Research;">
+<meta name="citation_reference" content="citation_title=Mistral 7B;,citation_abstract=We introduce Mistral 7B v0.1, a 7-billion-parameter language model engineered for superior performance and efficiency. Mistral 7B outperforms Llama 2 13B across all evaluated benchmarks, and Llama 1 34B in reasoning, mathematics, and code generation. Our model leverages grouped-query attention (GQA) for faster inference, coupled with sliding window attention (SWA) to effectively handle sequences of arbitrary length with a reduced inference cost. We also provide a model fine-tuned to follow instructions, Mistral 7B – Instruct, that surpasses the Llama 2 13B – Chat model both on human and automated benchmarks. Our models are released under the Apache 2.0 license.;,citation_author=Albert Q. Jiang;,citation_author=Alexandre Sablayrolles;,citation_author=Arthur Mensch;,citation_author=Chris Bamford;,citation_author=Devendra Singh Chaplot;,citation_author=Diego Casas;,citation_author=Florian Bressand;,citation_author=Gianna Lengyel;,citation_author=Guillaume Lample;,citation_author=Lucile Saulnier;,citation_author=Lélio Renard Lavaud;,citation_author=Marie-Anne Lachaux;,citation_author=Pierre Stock;,citation_author=Teven Le Scao;,citation_author=Thibaut Lavril;,citation_author=Thomas Wang;,citation_author=Timothée Lacroix;,citation_author=William El Sayed;,citation_publication_date=2023-10;,citation_cover_date=2023-10;,citation_year=2023;,citation_fulltext_html_url=https://arxiv.org/abs/2310.06825;,citation_doi=10.48550/arXiv.2310.06825;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=The Llama 3 Herd of Models;,citation_abstract=Modern artificial intelligence (AI) systems are powered by foundation models. This paper presents a new set of foundation models, called Llama 3. It is a herd of language models that natively support multilinguality, coding, reasoning, and tool usage. Our largest model is a dense Transformer with 405B parameters and a context window of up to 128K tokens. This paper presents an extensive empirical evaluation of Llama 3. We find that Llama 3 delivers comparable quality to leading language models such as GPT-4 on a plethora of tasks. We publicly release Llama 3, including pre-trained and post-trained versions of the 405B parameter language model and our Llama Guard 3 model for input and output safety. The paper also presents the results of experiments in which we integrate image, video, and speech capabilities into Llama 3 via a compositional approach. We observe this approach performs competitively with the state-of-the-art on image, video, and speech recognition tasks. The resulting models are not yet being broadly released as they are still under development.;,citation_author=Meta;,citation_publication_date=2024-11;,citation_cover_date=2024-11;,citation_year=2024;,citation_fulltext_html_url=https://arxiv.org/abs/2407.21783;,citation_doi=10.48550/arXiv.2407.21783;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=Keynote Address of Pehin Orang Kaya Seri Utama Dato Seri Setia Awang Haji Yahya bin Begawan Mudim Dato Paduka Haji Bakar, Minister of Industry and Primary Resources of Brunei Darussalam;,citation_author=undefined MIPR;,citation_publication_date=2012-09;,citation_cover_date=2012-09;,citation_year=2012;">
+<meta name="citation_reference" content="citation_title=Characterising Land Cover Change in Brunei Darussalam’s Capital District;,citation_abstract=In fast-developing regions like Southeast Asia monitoring urban areas presents a challenge given the lack of publicly available data. This is an issue that precludes the nuances of a city’s growth and undermines the way land use is considered with respect to planning. The issue of data availability is very much present in the small nation of Brunei. Little is still known about the spatiotemporal evolution of its urban realm in particular, with regard to its national development planning. The country presents an interesting case-study given the pursuit of two highly opposing master-plans within the last 40 years. Its first master plan advocated polycentric growth away from the capital city, Bandar Seri Begawan. Its latest plan, however, currently promotes compact growth within a predefined urban footprint as a development control mechanism. This paper looks at remotely-sensed satellite data to examine the way in which the two implemented master-plan strategies have translated into actual land-use thus far. It employs a supervised classification procedure and characterises urban land into three typologies: urban infill, edge growth, and leapfrog growth. The paper’s findings suggest that residential developments play a stronger role in driving urban growth in Brunei. This is particularly true for public housing, which has typically persisted in isolated pockets of low density at the city fringe. This study has produced a novel dataset of urban land use and land cover in Brunei; and, its quantification may prove useful in understanding the impacts of master planning and the formulation of development policies both within Brunei, and the wider Southeast Asian region.;,citation_author=Matthew Kok Ming Ng;,citation_author=Zahratu Shabrina;,citation_author=Boyana Buyuklieva;,citation_publication_date=2022-09;,citation_cover_date=2022-09;,citation_year=2022;,citation_issue=3;,citation_doi=10.1007/s12061-021-09429-9;,citation_issn=1874-4621;,citation_volume=15;,citation_language=en-US;,citation_journal_title=Applied Spatial Analysis and Policy;">
+<meta name="citation_reference" content="citation_title=Qwen2.5 Technical Report;,citation_abstract=In this report, we introduce Qwen2.5, a comprehensive series of large language models (LLMs) designed to meet diverse needs. Compared to previous iterations, Qwen 2.5 has been significantly improved during both the pre-training and post-training stages. In terms of pre-training, we have scaled the high-quality pre-training datasets from the previous 7 trillion tokens to 18 trillion tokens. This provides a strong foundation for common sense, expert knowledge, and reasoning capabilities. In terms of post-training, we implement intricate supervised finetuning with over 1 million samples, as well as multistage reinforcement learning. Post-training techniques enhance human preference, and notably improve long text generation, structural data analysis, and instruction following. To handle diverse and varied use cases effectively, we present Qwen2.5 LLM series in rich sizes. Open-weight offerings include base and instruction-tuned models, with quantized versions available. In addition, for hosted solutions, the proprietary models currently include two mixture-of-experts (MoE) variants: Qwen2.5-Turbo and Qwen2.5-Plus, both available from Alibaba Cloud Model Studio. Qwen2.5 has demonstrated top-tier performance on a wide range of benchmarks evaluating language understanding, reasoning, mathematics, coding, human preference alignment, etc. Specifically, the open-weight flagship Qwen2.5-72B-Instruct outperforms a number of open and proprietary models and demonstrates competitive performance to the state-of-the-art open-weight model, Llama-3-405B-Instruct, which is around 5 times larger. Qwen2.5-Turbo and Qwen2.5-Plus offer superior cost-effectiveness while performing competitively against GPT-4o-mini and GPT-4o respectively. Additionally, as the foundation, Qwen2.5 models have been instrumental in training specialized models such as Qwen2.5-Math, Qwen2.5-Coder, QwQ, and multimodal models.;,citation_author=Qwen;,citation_publication_date=2025-01;,citation_cover_date=2025-01;,citation_year=2025;,citation_fulltext_html_url=https://arxiv.org/abs/2412.15115;,citation_doi=10.48550/arXiv.2412.15115;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=Residential property price index for Indonesia using big data: The case of Jakarta;,citation_abstract=Monitoring property price dynamics is a necessary task for central banks in order to maintain financial stability in the economy. Big data offers potential as a new source of data that might be used to produce official statistics on property. In this paper, we develop an alternative residential property price index (RPPI) for the secondary market for houses from online residential property listings using the time-dummy hedonic regression method. The dataset is based on residential property advertisement listings from Indonesia’s major property web portals from January 2016 to September 2018. For this prototype index, the study initially focuses on Jakarta, the capital city of Indonesia. Our regression outputs generally show promising results and have the potential to become an official housing index. Future development will extend the index coverage to other large cities in the country and improve the characteristic variables in the model.;,citation_author=Arief Noor Rachman;,citation_publication_date=2019-02;,citation_cover_date=2019-02;,citation_year=2019;,citation_language=en-US;,citation_conference_title=International Conference on Real Estate Statistics;">
+<meta name="citation_reference" content="citation_title=Tidychatmodels: Chat with all kinds of AI models through a common interface;,citation_author=Albert Rapp;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=R: A language and environment for statistical computing;,citation_author=R Core Team;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Developing building benchmarking for Brunei Darussalam;,citation_abstract=This paper demonstrates the use of benchmarking methods for residential buildings in an energy rich economy. Three bottom-up methods were used, ordinary least square (OLS), support vector machines (SVM), and engineering modelling (EM). EM highlighted the energy inefficiency in these buildings, where the EM simulations showed the potential of halving the average measured consumption of 20.5MWh/year. SVM could demarcate buildings and households with consumption of $&amp;amp;amp;gt;$16.0MWh/year which are considered to be inefficiency. OLS is simple to use and the non-linear least square, showing R2$&amp;gt;$0.8, performs better than linear least square fit. This work allows two EUI benchmark measures to be determined and they have average values of 2035kWh/person/year and 56kWh/m2/year.;,citation_author=V. Shabunko;,citation_author=C. M. Lim;,citation_author=S. Brahim;,citation_author=S. Mathew;,citation_publication_date=2014-12;,citation_cover_date=2014-12;,citation_year=2014;,citation_doi=10.1016/j.enbuild.2014.08.047;,citation_issn=0378-7788;,citation_volume=85;,citation_journal_title=Energy and Buildings;">
+<meta name="citation_reference" content="citation_title=Rvest: Easily harvest (scrape) web pages;,citation_author=Hadley Wickham;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Ellmer: Chat with large language models;,citation_author=Hadley Wickham;,citation_author=Joe Cheng;,citation_author=Aaron Jacobs;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;">
+</head>
+
+  <body class="quarto-notebook">
+    <div id="quarto-embed-header" class="headroom fixed-top bg-primary">
+      
+      <a onclick="window.quartoBackToArticle(); return false;" class="btn btn-primary quarto-back-link" href=""><i class="bi bi-caret-left"></i> Back to Article</a>
+      <h6><i class="bi bi-journal-code"></i> Missing Data Patterns</h6>
+
+            <a href="../notebooks/missing.qmd" class="btn btn-primary quarto-download-embed" download="missing.qmd">Download Source</a>
+          </div>
+
+     <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-right">
+      <h1 class="title">Missing Data Patterns</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+        
+        <div class="quarto-title-meta column-page-right">
+
+                <div>
+            <div class="quarto-title-meta-heading">Author</div>
+            <div class="quarto-title-meta-contents">
+                        <p>Haziq Jamil </p>
+                      </div>
+          </div>
+                
+          
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      </div>
+    </div>
+
+
+
+    <div class="quarto-other-links-text-target">
+    <div class="quarto-other-links"><div class="quarto-title-meta-heading">Other Links</div><div class="quarto-title-meta-contents"><span style="padding-right: 0.5em;"><a href="../data/hspbn_2025-03-03.csv"><i class="bi bi-database"></i>Brunei House Price Data</a>,</span><span style="padding-right: 0.5em;"><a href="../data/rppi.csv"><i class="bi bi-database"></i>BDCB RPPI</a>,</span><span><a href="https://raw.githubusercontent.com/Bruneiverse/bruneimap/refs/heads/main/inst/extdata/bn_kpg_level_data.csv"><i class="bi bi-database"></i>Brunei Spatial Area Data</a></span></div></div></div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-full toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link active" data-scroll-target="#load-data">Load data</a></li>
+  <li><a href="#missing-data-patterns" id="toc-missing-data-patterns" class="nav-link" data-scroll-target="#missing-data-patterns">Missing data patterns</a></li>
+  <li><a href="#simulating-missingness-mechanism" id="toc-simulating-missingness-mechanism" class="nav-link" data-scroll-target="#simulating-missingness-mechanism">Simulating missingness mechanism</a></li>
+  <li><a href="#main-article" id="toc-main-article" class="nav-link" data-scroll-target="#main-article">Main article</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content quarto-banner-title-block column-page-right" id="quarto-document-content">      
+
+       <section id="load-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-data">Load data</h2>
+<div class="cell-container"><div class="cell-decorator"><pre>In [1]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bruneimap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: sf
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 method overwritten by 'GGally':
+  method from   
+  +.gg   ggplot2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"notebooks/data.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>here() starts at /Users/haziqj/github_local/house-data</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Main data set</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>hsp <span class="ot">&lt;-</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/hspbn_2025-03-03.csv"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="fu">factor</span>(type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Detached"</span>, <span class="st">"Semi-Detached"</span>, <span class="st">"Terrace"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="st">"Apartment"</span>, <span class="st">"Land"</span>)),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">tenure =</span> <span class="fu">factor</span>(tenure, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Freehold"</span>, <span class="st">"Leasehold"</span>, <span class="st">"Strata"</span>)),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">status =</span> <span class="fu">factor</span>(status, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Proposed"</span>, <span class="st">"Under Construction"</span>, <span class="st">"New"</span>, <span class="st">"Resale"</span>)),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date, <span class="at">format =</span> <span class="st">"%d/%m/%y"</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter =</span> zoo<span class="sc">::</span><span class="fu">as.yearqtr</span>(quarter)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 31116 Columns: 18
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (10): quarter, kampong, mukim, district, type, tenure, status, agent, s...
+dbl   (7): id, price, plot_area, floor_area, storeys, beds, baths
+date  (1): date
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># RPPI from BDCB</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>rppi <span class="ot">&lt;-</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/rppi.csv"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter =</span> zoo<span class="sc">::</span><span class="fu">as.yearqtr</span>(quarter),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rppi =</span> rppi <span class="sc">/</span> <span class="dv">100</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 39 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (1): quarter
+dbl (1): rppi
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To create median price per square foot, need to filter out "Land" types as</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># well as missing property types. Then create an "Overall" type.</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>hsp_all <span class="ot">&lt;-</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    hsp, </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(hsp, <span class="at">type =</span> <span class="st">"Overall"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(date) </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a median price per square foot index</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>hsp_rppi <span class="ot">&lt;-</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  slider<span class="sc">::</span><span class="fu">slide_period_dfr</span>(hsp, hsp<span class="sc">$</span>date, <span class="st">"month"</span>, \(df) {</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">|&gt;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(type <span class="sc">!=</span> <span class="st">"Land"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">drop_na</span>(floor_area) <span class="sc">|&gt;</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">quarter =</span> <span class="fu">first</span>(quarter),</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">price =</span> <span class="fu">median</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># plot_area = median(plot_area, na.rm = TRUE),</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">floor_area =</span> <span class="fu">median</span>(floor_area, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">.before =</span> <span class="dv">1</span>, <span class="at">.after =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(price<span class="sc">:</span>floor_area, \(x) <span class="fu">median</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="at">.by =</span> quarter) <span class="sc">|&gt;</span> </span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(quarter) <span class="sc">|&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">price_per_sqft =</span> price <span class="sc">/</span> floor_area,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">index =</span> price_per_sqft <span class="sc">/</span> price_per_sqft[quarter <span class="sc">==</span> <span class="st">"2015 Q1"</span>],</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">right_join</span>(rppi, <span class="at">by =</span> <span class="fu">join_by</span>(quarter)) </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>rppi_mae <span class="ot">&lt;-</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  hsp_rppi <span class="sc">|&gt;</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">rmse =</span> (<span class="fu">mean</span>( <span class="fu">abs</span>(rppi <span class="sc">-</span> index) <span class="sc">^</span> <span class="dv">1</span>)),</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">range =</span> <span class="fu">max</span>(<span class="fu">c</span>(rppi)) <span class="sc">-</span> <span class="fu">min</span>(<span class="fu">c</span>(rppi)),</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mean</span>(<span class="fu">c</span>(rppi)),</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(<span class="fu">c</span>(rppi))</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>()</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="co"># (rmse &lt;- as.numeric(rppi_mae[1]))</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="co"># (nmae &lt;- (rppi_mae[1] / rppi_mae[-1])[2])</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an sf data frame for plotting Brunei map</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>hsp_mkm <span class="ot">&lt;-</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  hsp <span class="sc">|&gt;</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">price =</span> <span class="fu">median</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>, <span class="at">trim =</span> <span class="fl">0.05</span>),</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> mukim</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">x =</span> bruneimap<span class="sc">::</span>mkm_sf, <span class="at">by =</span> <span class="fu">join_by</span>(mukim)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+</section>
+<section id="missing-data-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="missing-data-patterns">Missing data patterns</h2>
+<p>Let’s take a look at the missing data patterns in the housing data. For simplicity, we focus on the year 2024 and houses in the Brunei-Muara district.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [2]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>hsp24 <span class="ot">&lt;-</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  hsp <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(date) <span class="sc">==</span> <span class="dv">2024</span>, district <span class="sc">==</span> <span class="st">"Brunei-Muara"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(price, mukim, plot_area, floor_area, beds, baths)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(hsp24)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 2,698
+Columns: 6
+$ price      &lt;dbl&gt; 100000, 265000, 188000, 175000, 300000, 300000, 208000, 218…
+$ mukim      &lt;chr&gt; "Mukim Kilanas", "Mukim Kilanas", "Mukim Lumapas", "Mukim M…
+$ plot_area  &lt;dbl&gt; 0.2500, 0.0810, 0.1000, 0.0490, 0.1340, 0.1500, 0.0420, 0.0…
+$ floor_area &lt;dbl&gt; 1500.00, 2382.00, 1765.00, 1700.00, 2000.00, 2000.00, 2588.…
+$ beds       &lt;dbl&gt; 3, 4, NA, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 4, 5, 4, 4, 4, N…
+$ baths      &lt;dbl&gt; 3, 3, NA, 2, 2, 2, 4, 4, 3, 3, 3, 3, 3, 4, 3, 5, 3, 3, 4, N…</code></pre>
+</div>
+</div></div>
+<p>There are a total of 2698 houses in the Brunei-Muara district in 2024. There are a couple of missing values in the data set, 1013 to be exact. We can visualise this using the <code>{mice}</code> and <code>{ggmice}</code> package.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [3]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'mice'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    cbind, rbind</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggmice)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ggmice'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:mice':
+
+    bwplot, densityplot, stripplot, xyplot</code></pre>
+</div>
+</div></div>
+<p>Let’s take a look at the missing data patterns in the housing data.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [4]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pattern</span>(hsp24, <span class="at">square =</span> <span class="sc">!</span><span class="cn">TRUE</span>, <span class="at">rotate =</span> <span class="sc">!</span><span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="">
+<figure class="figure">
+<p class=""><a href="missing_files/figure-html/unnamed-chunk-4-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="missing_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div></div>
+<p>We first note that in this instance, there are no missing values for price and spatial location. However, there is a pattern in the missing data, so the missingness mechanism is not <em>completely</em> at random. It seems to be the case that the missing data is <em>at random</em> (MAR), which means that the missing data is dependent on the observed data. We can test this using a logistic regression.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [5]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>hsp24 <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), is.na)) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> beds <span class="sc">~</span> plot_area <span class="sc">+</span> floor_area <span class="sc">+</span> baths, <span class="at">family =</span> binomial) <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = beds ~ plot_area + floor_area + baths, family = binomial, 
+    data = mutate(hsp24, across(everything(), is.na)))
+
+Coefficients:
+               Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)     -5.5048     0.3427 -16.065   &lt;2e-16 ***
+plot_areaTRUE   -1.0541     0.6745  -1.563    0.118    
+floor_areaTRUE  -0.5194     0.6731  -0.772    0.440    
+bathsTRUE        8.4491     0.5281  15.998   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1030.18  on 2697  degrees of freedom
+Residual deviance:  181.66  on 2694  degrees of freedom
+AIC: 189.66
+
+Number of Fisher Scoring iterations: 8</code></pre>
+</div>
+</div></div>
+<p>What we can see is that the <code>beds</code> variable missingness is dependent on the <code>bath</code> missingness, which means that if the number of bathrooms is missing, the number of bedrooms is also likely to be missing (odds ratio increases by <span class="math inline">\(e^{8.52} = 5014.1\)</span>).</p>
+<p>On the other hand, the missingness of the <code>floor_area</code> variable does not seem to be dependent on the other variables, which means that this variable is missing <em>completely</em> at random (MCAR).</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [6]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>hsp24 <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), is.na)) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> floor_area <span class="sc">~</span> plot_area <span class="sc">+</span> beds <span class="sc">+</span> baths, <span class="at">family =</span> binomial) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = floor_area ~ plot_area + beds + baths, family = binomial, 
+    data = mutate(hsp24, across(everything(), is.na)))
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)   -1.57205    0.05531 -28.423   &lt;2e-16 ***
+plot_areaTRUE -0.13584    0.16938  -0.802    0.423    
+bedsTRUE      -0.62988    0.68264  -0.923    0.356    
+bathsTRUE      0.29536    0.66749   0.443    0.658    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2441.9  on 2697  degrees of freedom
+Residual deviance: 2439.2  on 2694  degrees of freedom
+AIC: 2447.2
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div></div>
+<p>Let’s visualise the missing points as a scatter plot.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [7]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmice</span>(hsp24, <span class="fu">aes</span>(<span class="at">y =</span> price <span class="sc">/</span> <span class="dv">1000</span>, <span class="at">x =</span> floor_area)) <span class="sc">+</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">col =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">dollar_format</span>()) <span class="sc">+</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Price (BND 1,000)"</span>, <span class="at">x =</span> <span class="st">"Floor area (sq. ft.)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Mapping variable 'price/1000' recognized internally as price.
+Please verify whether this matches the requested mapping variable.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 453 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="">
+<figure class="figure">
+<p class=""><a href="missing_files/figure-html/unnamed-chunk-7-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="missing_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div></div>
+</section>
+<section id="simulating-missingness-mechanism" class="level2">
+<h2 class="anchored" data-anchor-id="simulating-missingness-mechanism">Simulating missingness mechanism</h2>
+<p>Suppose we have a full data set and we want to simulate a missingness mechanism. For this purpose, we have the following data sets:</p>
+<ol type="1">
+<li>DATA SET A: The original data set containing missing values.</li>
+<li>DATA SET B: The “complete cases” data set, i.e.&nbsp;subsetting DATA SET A containing no missing values whatsoever.</li>
+</ol>
+<p>Suppose we want to induce missingness in B with the same pattern as A. Here’s the code to do it:</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [8]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>datA <span class="ot">&lt;-</span> hsp24</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>datB <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(hsp24)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Calculate the proportion of missing values for each variable in the original data</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>pat <span class="ot">&lt;-</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  mice<span class="sc">::</span><span class="fu">md.pattern</span>(datA, <span class="at">plot =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"freq"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>V7) <span class="sc">|&gt;</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">"pattern"</span>, beds<span class="sc">:</span>floor_area, <span class="at">sep =</span> <span class="st">""</span>, <span class="at">remove =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">freq =</span> <span class="fu">as.numeric</span>(freq),</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop =</span> freq <span class="sc">/</span> <span class="fu">sum</span>(freq),</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="fu">row_number</span>()</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>pat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 10
+    freq price mukim pattern  beds baths plot_area floor_area     prop    id
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+ 1  1885     1     1 1111        1     1         1          1 0.699        1
+ 2   395     1     1 1110        1     1         1          0 0.146        2
+ 3   240     1     1 1101        1     1         0          1 0.0890       3
+ 4    41     1     1 1100        1     1         0          0 0.0152       4
+ 5     6     1     1 1011        1     0         1          1 0.00222      5
+ 6     2     1     1 1001        1     0         0          1 0.000741     6
+ 7     1     1     1 1000        1     0         0          0 0.000371     7
+ 8     9     1     1 0111        0     1         1          1 0.00334      8
+ 9    87     1     1 0011        0     0         1          1 0.0322       9
+10    12     1     1 0010        0     0         1          0 0.00445     10
+11    16     1     1 0001        0     0         0          1 0.00593     11
+12     4     1     1 0000        0     0         0          0 0.00148     12</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Randomly sample from this multinomial distribution</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>mis <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="at">x =</span> pat<span class="sc">$</span>pattern, <span class="at">size =</span> <span class="fu">nrow</span>(datB), <span class="at">prob =</span> pat<span class="sc">$</span>prop, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that it matches the original pattern</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(mis)), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mis
+ 0000  0001  0010  0011  0111  1001  1011  1100  1101  1110  1111 
+0.001 0.005 0.006 0.033 0.006 0.001 0.002 0.013 0.084 0.149 0.700 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rev</span>(<span class="fu">round</span>(pat<span class="sc">$</span>prop, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 0.001 0.006 0.004 0.032 0.003 0.000 0.001 0.002 0.015 0.089 0.146 0.699</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Introduce missing values into the complete dataset based on these proportions</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(datB)) {</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  na_flags <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">strsplit</span>(mis[i], <span class="st">""</span>)[[<span class="dv">1</span>]]) <span class="sc">==</span> <span class="dv">0</span>L</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  datB[, <span class="fu">c</span>(<span class="st">"beds"</span>, <span class="st">"baths"</span>, <span class="st">"plot_area"</span>, <span class="st">"floor_area"</span>)][i, na_flags] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+<p>Let’s visualise the missing data patterns in the simulated data set.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [9]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pattern</span>(datB, <span class="at">square =</span> <span class="sc">!</span><span class="cn">TRUE</span>, <span class="at">rotate =</span> <span class="sc">!</span><span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="">
+<figure class="figure">
+<p class=""><a href="missing_files/figure-html/unnamed-chunk-9-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="missing_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div></div>
+<p>Some patterns are there, but some are not. This is expected when some of the missing patterns are rare.</p>
+</section>
+<section id="main-article" class="level2">
+<h2 class="anchored" data-anchor-id="main-article">Main article</h2>
+<div class="cell-container"><div class="cell-decorator"><pre>In [10]:</pre></div><div id="cell-fig-missing-pattern" class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>hsp <span class="sc">|&gt;</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(price, plot_area, floor_area, beds, baths) <span class="sc">|&gt;</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_pattern</span>(<span class="at">npat =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="fl">0.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Number of patterns specified is equal to or greater than the total number of
+patterns.
+ℹ All missing data patterns are shown.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Coordinate system already present. Adding new coordinate system, which will
+replace the existing one.</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-missing-pattern" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-missing-pattern-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
+<a href="missing_files/figure-html/fig-missing-pattern-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Missing data patterns for key house characteristics."><img src="missing_files/figure-html/fig-missing-pattern-1.png" class="img-fluid figure-img" style="width:100.0%"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-missing-pattern-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Missing data patterns for key house characteristics.
+</figcaption>
+</figure>
+</div>
+</div>
+</div></div>
+</section>
+     </main>
+<!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script> 
+  
+</body></html>

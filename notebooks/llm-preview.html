@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="generator" content="quarto-1.7.13">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <meta name="author" content="Haziq Jamil">
+
+    <title>Data Extraction using LLM</title>
+    <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      div.columns{display: flex; gap: min(4vw, 1.5em);}
+      div.column{flex: auto; overflow-x: auto;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+        vertical-align: middle;
+      }
+      /* CSS for syntax highlighting */
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+        }
+      pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+    </style>
+
+    <style>
+      body.hypothesis-enabled #quarto-embed-header {
+        padding-right: 36px;
+      }
+
+      #quarto-embed-header {
+        height: 3em;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px;
+      }
+
+      #quarto-embed-header h6 {
+        font-size: 1.1em;
+        padding-top: 0.6em;
+        margin-left: 1em;
+        margin-right: 1em;
+        font-weight: 400;
+      }
+
+      #quarto-embed-header a.quarto-back-link,
+      #quarto-embed-header a.quarto-download-embed {
+        font-size: 0.8em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+      .quarto-back-container {
+        padding-left: 0.5em;
+        display: flex;
+      }
+
+      .headroom {
+          will-change: transform;
+          transition: transform 200ms linear;
+      }
+
+      .headroom--pinned {
+          transform: translateY(0%);
+      }
+
+      .headroom--unpinned {
+          transform: translateY(-100%);
+      }      
+    </style>
+
+    <script>
+    window.document.addEventListener("DOMContentLoaded", function () {
+
+      var header = window.document.querySelector("#quarto-embed-header");
+      const titleBannerEl = window.document.querySelector("body > #title-block-header");
+      if (titleBannerEl) {
+        titleBannerEl.style.paddingTop = header.clientHeight + "px";
+      }
+      const contentEl = window.document.getElementById('quarto-content');
+      for (const child of contentEl.children) {
+        child.style.paddingTop = header.clientHeight + "px";
+        child.style.marginTop = "1em";
+      }
+
+      // Use the article root if the `back` call doesn't work. This isn't perfect
+      // but should typically work
+      window.quartoBackToArticle = () => {
+        var currentUrl = window.location.href;
+        window.history.back();
+        setTimeout(() => {
+            // if location was not changed in 100 ms, then there is no history back
+            if(currentUrl === window.location.href){              
+                // redirect to site root
+                window.location.href = "../index.html";
+            }
+        }, 100);
+      }
+
+      const headroom = new window.Headroom(header, {
+        tolerance: 5,
+        onPin: function () {
+        },
+        onUnpin: function () {
+        },
+      });
+      headroom.init();
+    });
+    </script>
+
+    
+<script src="../site_libs/manuscript-notebook/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-66ab7fd5e73b7f0a764e0d49b3e29ab1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fb465d422994eb3252504be870f58722.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+     
+      <meta name="citation_title" content="Data Extraction using LLM">
+<meta name="citation_author" content="Haziq Jamil">
+<meta name="citation_publication_date" content="2025">
+<meta name="citation_cover_date" content="2025">
+<meta name="citation_year" content="2025">
+<meta name="citation_fulltext_html_url" content="https://github.com/Bruneiverse/house-data">
+<meta name="citation_language" content="en">
+<meta name="citation_journal_title" content="Manuscript in Submission">
+<meta name="citation_reference" content="citation_title=Ollama/ollama;,citation_abstract=Get up and running with Llama 3.3, Mistral, Gemma 2, and other large language models.;,citation_publication_date=2024-12;,citation_cover_date=2024-12;,citation_year=2024;,citation_publisher=Ollama;">
+<meta name="citation_reference" content="citation_title=Phi-4 Technical Report;,citation_abstract=We present phi-4, a 14-billion parameter language model developed with a training recipe that is centrally focused on data quality. Unlike most language models, where pre-training is based primarily on organic data sources such as web content or code, phi-4 strategically incorporates synthetic data throughout the training process. While previous models in the Phi family largely distill the capabilities of a teacher model (specifically GPT-4), phi-4 substantially surpasses its teacher model on STEM-focused QA capabilities, giving evidence that our data-generation and post-training techniques go beyond distillation. Despite minimal changes to the phi-3 architecture, phi-4 achieves strong performance relative to its size – especially on reasoning-focused benchmarks – due to improved data, training curriculum, and innovations in the post-training scheme.;,citation_author=Marah Abdin;,citation_author=Jyoti Aneja;,citation_author=Harkirat Behl;,citation_author=Sébastien Bubeck;,citation_author=Ronen Eldan;,citation_author=Suriya Gunasekar;,citation_author=Michael Harrison;,citation_author=Russell J. Hewett;,citation_author=Mojan Javaheripi;,citation_author=Piero Kauffmann;,citation_author=James R. Lee;,citation_author=Yin Tat Lee;,citation_author=Yuanzhi Li;,citation_author=Weishung Liu;,citation_author=Caio C. T. Mendes;,citation_author=Anh Nguyen;,citation_author=Eric Price;,citation_author=Gustavo Rosa;,citation_author=Olli Saarikivi;,citation_author=Adil Salim;,citation_author=Shital Shah;,citation_author=Xin Wang;,citation_author=Rachel Ward;,citation_author=Yue Wu;,citation_author=Dingli Yu;,citation_author=Cyril Zhang;,citation_author=Yi Zhang;,citation_publication_date=2024-12;,citation_cover_date=2024-12;,citation_year=2024;,citation_fulltext_html_url=https://arxiv.org/abs/2412.08905;,citation_doi=10.48550/arXiv.2412.08905;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=A pioneering study on measuring poverty in the hydrocarbon-rich state of Brunei Darussalam;,citation_abstract=Poverty exists not only in low and middle-income countries but also in high-income countries. Brunei, a rich country heavily reliant on hydrocarbon in Southeast Asia, is not an exception. Though poverty is not a topic that is politically taboo in Brunei, there are no statistics on poverty in Brunei. Yet, having such statistics would aid the government to achieve the target of zero poverty in 2035. Therefore, this technical paper provides a pioneering estimation of poverty rates in Brunei, utilising published data from “Household Expenditure Surveys” and focusing on the basic need approach. It calculates monthly household poverty rates based on the World Bank’s poverty lines and OECD median income approach. It produces poverty rates based on expenditure and income. The research employs two models: a proportional model and a refined model. The results show declining rates of poverty, regardless of the poverty lines and models.;,citation_author=Evi Nurvidya Arifin;,citation_author=Aris Ananta;,citation_author=Siti Fatimahwati Pehin Dato Musa;,citation_author=Chang-Yau Hoon;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_issue=0;,citation_doi=10.1080/17441730.2023.2240108;,citation_issn=1744-1730;,citation_volume=0;,citation_journal_title=Asian Population Studies;,citation_publisher=Routledge;">
+<meta name="citation_reference" content="citation_title=Technical Notes for Residential Property Price Index (RPPI);,citation_author=undefined BDCB;,citation_publication_date=2021-06;,citation_cover_date=2021-06;,citation_year=2021;,citation_technical_report_institution=Brunei Darussalam Central Bank;">
+<meta name="citation_reference" content="citation_title=PropTech: Turning Real Estate Into a Data-Driven Market?;,citation_author=Fabian Braesemann;,citation_author=Andrew Baum;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;,citation_doi=10.2139/ssrn.3607238;,citation_issn=1556-5068;,citation_language=en-US;,citation_journal_title=SSRN Electronic Journal;">
+<meta name="citation_reference" content="citation_title=DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning;,citation_abstract=We introduce our first-generation reasoning models, DeepSeek-R1-Zero and DeepSeek-R1. DeepSeek-R1-Zero, a model trained via large-scale reinforcement learning (RL) without supervised fine-tuning (SFT) as a preliminary step, demonstrates remarkable reasoning capabilities. Through RL, DeepSeek-R1-Zero naturally emerges with numerous powerful and intriguing reasoning behaviors. However, it encounters challenges such as poor readability, and language mixing. To address these issues and further enhance reasoning performance, we introduce DeepSeek-R1, which incorporates multi-stage training and cold-start data before RL. DeepSeek-R1 achieves performance comparable to OpenAI-o1-1217 on reasoning tasks. To support the research community, we open-source DeepSeek-R1-Zero, DeepSeek-R1, and six dense models (1.5B, 7B, 8B, 14B, 32B, 70B) distilled from DeepSeek-R1 based on Qwen and Llama.;,citation_author=DeepSeek-AI;,citation_publication_date=2025-01;,citation_cover_date=2025-01;,citation_year=2025;,citation_fulltext_html_url=https://arxiv.org/abs/2501.12948;,citation_doi=10.48550/arXiv.2501.12948;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=The big data regime shift in real estate;,citation_abstract=Purpose The paper explores the emergence of the “big data regime” and the disruption that it is causing for the real estate industry. The paper defines big data and illustrates how an inductive, big data approach can help improve decision-making. Design/methodology/approach The paper demonstrates how big data can support inductive reasoning that can lead to enhanced real estate decisions. To help readers understand the dynamics and drivers of the big data regime shift, an extensive list of hyperlinks is included. Findings The paper concludes that it is possible to blend traditional and non-traditional data into a unified data environment to support enhanced decision-making. Through the application of design thinking, the paper illustrates how socially responsible development can be targeted to under-served urban areas and helps serve residents and the communities in which they live. Research limitations/implications The paper demonstrates how big data can be harnessed to support decision-making using a hypothetical project. The paper does not present advanced analytics but focuses aggregating disparate longitudinal data that could support such analysis in future research. Practical implications The paper focuses on the US market, but the methodology can be extended to other markets where big data is increasingly available. Social implications The paper illustrates how big data analytics can be used to help serve the needs of marginalized residents and tenants, as well as blighted areas. Originality/value This paper documents the big data movement and demonstrates how non-traditional data can support decision-making.;,citation_author=James R. DeLisle;,citation_author=Brent Never;,citation_author=Terry V. Grissom;,citation_publication_date=2020-06;,citation_cover_date=2020-06;,citation_year=2020;,citation_issue=4;,citation_doi=10.1108/JPIF-10-2019-0134;,citation_issn=1463-578X;,citation_volume=38;,citation_language=en-US;,citation_journal_title=Journal of Property Investment &amp;amp;amp; Finance;">
+<meta name="citation_reference" content="citation_title=The Population and Housing Census Report (BPP) 2021: Demographic, Household and Housing Characteristics;,citation_author=undefined DEPS;,citation_publication_date=2022-10;,citation_cover_date=2022-10;,citation_year=2022;,citation_technical_report_institution=Department of Economic Planning and Statistics, Ministry of Finance and Economy, Brunei Darussalam;">
+<meta name="citation_reference" content="citation_title=Handbook on residential property prices indices (RPPIs).;,citation_author=European Commission. Eurostat;,citation_publication_date=2013;,citation_cover_date=2013;,citation_year=2013;,citation_language=en-US;">
+<meta name="citation_reference" content="citation_title=Cultural Consideration in Vertical Living in Brunei Darussalam Cultural Consideration in Vertical Living in Brunei Darussalam;,citation_abstract=The Government of Brunei Darussalam has played a central role in the provision of public housing in the form of landed property for many centuries. The period of modernity and economic growth has resulted in urban sprawl and declining available land. In a bid to arrest this unsustainable trend, the Government is promoting high-density, high-rise settlement complexes as an alternative to meet housing demands. The necessary legislation to support ownership of apartment units in multi-storey complexes, namely the Strata Title Act, has also been developed. The public, including real estate developers, however has not warmed to the initiative. Some analysts are of the view that there is a need to &amp;amp;amp;quot;re-engineer the Brunei society&amp;quot; to embrace vertical living via various means such as education and awareness. Nevertheless this paper will argue that the understanding and appreciation for Bruneians’ lifestyle as well as social and cultural proxemics are actually important for urban planners to consider. This study shows the different cultural typologies in Brunei which enabled the researchers to understand the cultural and social determinants that influences respondents’ choices with regards to the types and space preferences in relation to vertical housing. The paper puts forward a hypothesis that the Brunei society will warm up to vertical living if their cultural space needs are met in high-rise, high-density complexes. For the purpose of this study, a survey was conducted to validate the predictions of the model i.e. cultural architecture typology particularly targeting affected populations generated. The paper takes an insider-outsider approach which further emphasises the importance of local knowledge and understanding of local cultures and practices in research. It is hoped that the study will contribute to a better understanding of the housing demands of the Brunei society in general, and key cultural considerations with regards to vertical living in particular.;,citation_author=Noor Hasharina Hassan;,citation_author=Izni Azrein;,citation_author=Khairunnisa Ibrahim;,citation_author=Gabriel Yong;,citation_publication_date=2011-11;,citation_cover_date=2011-11;,citation_year=2011;,citation_conference_title=Managing Urban Growth: Challenges for Small Cities;">
+<meta name="citation_reference" content="citation_title=The Sociocultural Significance of Homeownership in Brunei Darussalam;,citation_abstract=Houses matter to Bruneians. However, there are varying values and meanings attached to a house depending on spatial and cultural differences, which influence people’s urgency to become homeowners. Governance, consumption patterns and sociocultural institutions shape how consumers value housing and influence their desire to become homeowners. This chapter suggests that Brunei Darussalam’s housing development and culture are unique compared to societies that have undergone significant financial liberalisation such as Britain and the United States. Financial liberalisation or financialisation involve governments reducing their restrictions on financial institutions and the financial markets. Based on qualitative research that involved 210 structured interviews, six in-depth interviews and secondary data, this study identifies the variables that influence the culture of homeownership in Brunei.;,citation_author=Noor Hasharina Hassan;,citation_editor=Lian Kwen Fee;,citation_editor=Paul J. Carnegie;,citation_editor=Noor Hasharina Hassan;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_doi=10.1007/978-981-19-6059-8_11;,citation_isbn=978-981-19-6059-8;,citation_language=en-US;,citation_inbook_title=(Re)presenting Brunei Darussalam: A Sociology of the Everyday;,citation_series_title=Asia in Transition;">
+<meta name="citation_reference" content="citation_title=Comparing house price indices in the UK;,citation_author=HM Land Registry;,citation_publication_date=2023-12;,citation_cover_date=2023-12;,citation_year=2023;,citation_language=en-US;,citation_technical_report_institution=HM Land Registry;">
+<meta name="citation_reference" content="citation_title=Bruneimap: Maps and Spatial Data of Brunei (R package version 0.3.1.9001);,citation_author=Haziq Jamil;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Leveraging Sparse Gaussian Processes for Property Price Modelling and Sustainable Urban Planning;,citation_author=Haziq Jamil;,citation_author=Fatin Usop;,citation_author=Huda M. Ramli;,citation_editor=Samsul Ariffin Abdul Karim;,citation_editor=Aslina Baharum;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_isbn=978-1-003-51839-6;,citation_inbook_title=Intelligent Systems of Computing and Informatics in Sustainable Urban Development;,citation_series_title=Intelligent Systems of Computing and Informatics;">
+<meta name="citation_reference" content="citation_title=A spatio-temporal analysis of house prices in Brunei Darussalam;,citation_abstract=This paper presents the first spatio-temporal analysis of property prices in Brunei Darussalam, a small, resource-rich economy with distinct housing market characteristics. Despite global interest in quantitative housing market analyses, Brunei’s market remains underexplored, with prior studies predominantly qualitative. Addressing this gap, $N=3,763$ residential transactions from 2015 to 2023 were analysed using Conditional Autoregressive (CAR) priors to model spatial dependencies and temporal trends in house prices accounting for other price determinants. Emerging Hotspot Analysis was then employed to classify price clustering across time. Key findings revealed significant spatial autocorrelation ($\rho = 0.43$) and temporal persistence best modeled by an autoregressive structure of order 2, indicating that market reactions to changes can extend up to six months. The results demonstrate the critical role of spatial and temporal factors in shaping property prices, providing actionable insights for policy interventions and real estate market analysis, particularly in addressing disparities between urban and rural housing markets.;,citation_author=Haziq Jamil;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_doi=10.13140/RG.2.2.32533.74720;,citation_language=en-US;">
+<meta name="citation_reference" content="citation_title=A Case of Homestays in Brunei as a Means of Socio-Economic Development;,citation_abstract=This paper aims to discuss how homestays in Brunei represents a means of socio-economic development. While recognizing the socio-economic benefits and revenue streams that homestays gain from not only providing accommodation facilities, the wide range of cultural activities and exposures will strengthen the preservation of Brunei’s cultural heritage. A case study approach and qualitative research method were conducted in this study. The key findings reveal that the community participation in three homestays is perceived to empower individuals in contributing on-going socio-economic development of their respective village. This study contributes knowledge and practical suggestions to potential ventures, homestay operators and researchers.;,citation_author=Siti Aisah Janaji;,citation_author=Fahmi Ibrahim;,citation_publication_date=2020-11;,citation_cover_date=2020-11;,citation_year=2020;,citation_issue=4;,citation_doi=10.31580/ijer.v3i4.1659;,citation_issn=2663-7588, 2663-757X;,citation_volume=3;,citation_journal_title=International Journal of Entrepreneurial Research;">
+<meta name="citation_reference" content="citation_title=Mistral 7B;,citation_abstract=We introduce Mistral 7B v0.1, a 7-billion-parameter language model engineered for superior performance and efficiency. Mistral 7B outperforms Llama 2 13B across all evaluated benchmarks, and Llama 1 34B in reasoning, mathematics, and code generation. Our model leverages grouped-query attention (GQA) for faster inference, coupled with sliding window attention (SWA) to effectively handle sequences of arbitrary length with a reduced inference cost. We also provide a model fine-tuned to follow instructions, Mistral 7B – Instruct, that surpasses the Llama 2 13B – Chat model both on human and automated benchmarks. Our models are released under the Apache 2.0 license.;,citation_author=Albert Q. Jiang;,citation_author=Alexandre Sablayrolles;,citation_author=Arthur Mensch;,citation_author=Chris Bamford;,citation_author=Devendra Singh Chaplot;,citation_author=Diego Casas;,citation_author=Florian Bressand;,citation_author=Gianna Lengyel;,citation_author=Guillaume Lample;,citation_author=Lucile Saulnier;,citation_author=Lélio Renard Lavaud;,citation_author=Marie-Anne Lachaux;,citation_author=Pierre Stock;,citation_author=Teven Le Scao;,citation_author=Thibaut Lavril;,citation_author=Thomas Wang;,citation_author=Timothée Lacroix;,citation_author=William El Sayed;,citation_publication_date=2023-10;,citation_cover_date=2023-10;,citation_year=2023;,citation_fulltext_html_url=https://arxiv.org/abs/2310.06825;,citation_doi=10.48550/arXiv.2310.06825;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=The Llama 3 Herd of Models;,citation_abstract=Modern artificial intelligence (AI) systems are powered by foundation models. This paper presents a new set of foundation models, called Llama 3. It is a herd of language models that natively support multilinguality, coding, reasoning, and tool usage. Our largest model is a dense Transformer with 405B parameters and a context window of up to 128K tokens. This paper presents an extensive empirical evaluation of Llama 3. We find that Llama 3 delivers comparable quality to leading language models such as GPT-4 on a plethora of tasks. We publicly release Llama 3, including pre-trained and post-trained versions of the 405B parameter language model and our Llama Guard 3 model for input and output safety. The paper also presents the results of experiments in which we integrate image, video, and speech capabilities into Llama 3 via a compositional approach. We observe this approach performs competitively with the state-of-the-art on image, video, and speech recognition tasks. The resulting models are not yet being broadly released as they are still under development.;,citation_author=Meta;,citation_publication_date=2024-11;,citation_cover_date=2024-11;,citation_year=2024;,citation_fulltext_html_url=https://arxiv.org/abs/2407.21783;,citation_doi=10.48550/arXiv.2407.21783;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=Keynote Address of Pehin Orang Kaya Seri Utama Dato Seri Setia Awang Haji Yahya bin Begawan Mudim Dato Paduka Haji Bakar, Minister of Industry and Primary Resources of Brunei Darussalam;,citation_author=undefined MIPR;,citation_publication_date=2012-09;,citation_cover_date=2012-09;,citation_year=2012;">
+<meta name="citation_reference" content="citation_title=Characterising Land Cover Change in Brunei Darussalam’s Capital District;,citation_abstract=In fast-developing regions like Southeast Asia monitoring urban areas presents a challenge given the lack of publicly available data. This is an issue that precludes the nuances of a city’s growth and undermines the way land use is considered with respect to planning. The issue of data availability is very much present in the small nation of Brunei. Little is still known about the spatiotemporal evolution of its urban realm in particular, with regard to its national development planning. The country presents an interesting case-study given the pursuit of two highly opposing master-plans within the last 40 years. Its first master plan advocated polycentric growth away from the capital city, Bandar Seri Begawan. Its latest plan, however, currently promotes compact growth within a predefined urban footprint as a development control mechanism. This paper looks at remotely-sensed satellite data to examine the way in which the two implemented master-plan strategies have translated into actual land-use thus far. It employs a supervised classification procedure and characterises urban land into three typologies: urban infill, edge growth, and leapfrog growth. The paper’s findings suggest that residential developments play a stronger role in driving urban growth in Brunei. This is particularly true for public housing, which has typically persisted in isolated pockets of low density at the city fringe. This study has produced a novel dataset of urban land use and land cover in Brunei; and, its quantification may prove useful in understanding the impacts of master planning and the formulation of development policies both within Brunei, and the wider Southeast Asian region.;,citation_author=Matthew Kok Ming Ng;,citation_author=Zahratu Shabrina;,citation_author=Boyana Buyuklieva;,citation_publication_date=2022-09;,citation_cover_date=2022-09;,citation_year=2022;,citation_issue=3;,citation_doi=10.1007/s12061-021-09429-9;,citation_issn=1874-4621;,citation_volume=15;,citation_language=en-US;,citation_journal_title=Applied Spatial Analysis and Policy;">
+<meta name="citation_reference" content="citation_title=Qwen2.5 Technical Report;,citation_abstract=In this report, we introduce Qwen2.5, a comprehensive series of large language models (LLMs) designed to meet diverse needs. Compared to previous iterations, Qwen 2.5 has been significantly improved during both the pre-training and post-training stages. In terms of pre-training, we have scaled the high-quality pre-training datasets from the previous 7 trillion tokens to 18 trillion tokens. This provides a strong foundation for common sense, expert knowledge, and reasoning capabilities. In terms of post-training, we implement intricate supervised finetuning with over 1 million samples, as well as multistage reinforcement learning. Post-training techniques enhance human preference, and notably improve long text generation, structural data analysis, and instruction following. To handle diverse and varied use cases effectively, we present Qwen2.5 LLM series in rich sizes. Open-weight offerings include base and instruction-tuned models, with quantized versions available. In addition, for hosted solutions, the proprietary models currently include two mixture-of-experts (MoE) variants: Qwen2.5-Turbo and Qwen2.5-Plus, both available from Alibaba Cloud Model Studio. Qwen2.5 has demonstrated top-tier performance on a wide range of benchmarks evaluating language understanding, reasoning, mathematics, coding, human preference alignment, etc. Specifically, the open-weight flagship Qwen2.5-72B-Instruct outperforms a number of open and proprietary models and demonstrates competitive performance to the state-of-the-art open-weight model, Llama-3-405B-Instruct, which is around 5 times larger. Qwen2.5-Turbo and Qwen2.5-Plus offer superior cost-effectiveness while performing competitively against GPT-4o-mini and GPT-4o respectively. Additionally, as the foundation, Qwen2.5 models have been instrumental in training specialized models such as Qwen2.5-Math, Qwen2.5-Coder, QwQ, and multimodal models.;,citation_author=Qwen;,citation_publication_date=2025-01;,citation_cover_date=2025-01;,citation_year=2025;,citation_fulltext_html_url=https://arxiv.org/abs/2412.15115;,citation_doi=10.48550/arXiv.2412.15115;,citation_publisher=arXiv;">
+<meta name="citation_reference" content="citation_title=Residential property price index for Indonesia using big data: The case of Jakarta;,citation_abstract=Monitoring property price dynamics is a necessary task for central banks in order to maintain financial stability in the economy. Big data offers potential as a new source of data that might be used to produce official statistics on property. In this paper, we develop an alternative residential property price index (RPPI) for the secondary market for houses from online residential property listings using the time-dummy hedonic regression method. The dataset is based on residential property advertisement listings from Indonesia’s major property web portals from January 2016 to September 2018. For this prototype index, the study initially focuses on Jakarta, the capital city of Indonesia. Our regression outputs generally show promising results and have the potential to become an official housing index. Future development will extend the index coverage to other large cities in the country and improve the characteristic variables in the model.;,citation_author=Arief Noor Rachman;,citation_publication_date=2019-02;,citation_cover_date=2019-02;,citation_year=2019;,citation_language=en-US;,citation_conference_title=International Conference on Real Estate Statistics;">
+<meta name="citation_reference" content="citation_title=Tidychatmodels: Chat with all kinds of AI models through a common interface;,citation_author=Albert Rapp;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=R: A language and environment for statistical computing;,citation_author=R Core Team;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Developing building benchmarking for Brunei Darussalam;,citation_abstract=This paper demonstrates the use of benchmarking methods for residential buildings in an energy rich economy. Three bottom-up methods were used, ordinary least square (OLS), support vector machines (SVM), and engineering modelling (EM). EM highlighted the energy inefficiency in these buildings, where the EM simulations showed the potential of halving the average measured consumption of 20.5MWh/year. SVM could demarcate buildings and households with consumption of $&amp;amp;amp;gt;$16.0MWh/year which are considered to be inefficiency. OLS is simple to use and the non-linear least square, showing R2$&amp;gt;$0.8, performs better than linear least square fit. This work allows two EUI benchmark measures to be determined and they have average values of 2035kWh/person/year and 56kWh/m2/year.;,citation_author=V. Shabunko;,citation_author=C. M. Lim;,citation_author=S. Brahim;,citation_author=S. Mathew;,citation_publication_date=2014-12;,citation_cover_date=2014-12;,citation_year=2014;,citation_doi=10.1016/j.enbuild.2014.08.047;,citation_issn=0378-7788;,citation_volume=85;,citation_journal_title=Energy and Buildings;">
+<meta name="citation_reference" content="citation_title=Rvest: Easily harvest (scrape) web pages;,citation_author=Hadley Wickham;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Ellmer: Chat with large language models;,citation_author=Hadley Wickham;,citation_author=Joe Cheng;,citation_author=Aaron Jacobs;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;">
+</head>
+
+  <body class="quarto-notebook">
+    <div id="quarto-embed-header" class="headroom fixed-top bg-primary">
+      
+      <a onclick="window.quartoBackToArticle(); return false;" class="btn btn-primary quarto-back-link" href=""><i class="bi bi-caret-left"></i> Back to Article</a>
+      <h6><i class="bi bi-journal-code"></i> Data Extraction using LLM</h6>
+
+            <a href="../notebooks/llm.qmd" class="btn btn-primary quarto-download-embed" download="llm.qmd">Download Source</a>
+          </div>
+
+     <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page">
+      <h1 class="title">Data Extraction using LLM</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+        
+        <div class="quarto-title-meta column-page">
+
+                <div>
+            <div class="quarto-title-meta-heading">Author</div>
+            <div class="quarto-title-meta-contents">
+                        <p>Haziq Jamil </p>
+                      </div>
+          </div>
+                
+          
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      </div>
+    </div>
+
+
+
+    <div class="quarto-other-links-text-target">
+    <div class="quarto-other-links"><div class="quarto-title-meta-heading">Other Links</div><div class="quarto-title-meta-contents"><span style="padding-right: 0.5em;"><a href="../data/hspbn_2025-03-03.csv"><i class="bi bi-database"></i>Brunei House Price Data</a>,</span><span style="padding-right: 0.5em;"><a href="../data/rppi.csv"><i class="bi bi-database"></i>BDCB RPPI</a>,</span><span><a href="https://raw.githubusercontent.com/Bruneiverse/bruneimap/refs/heads/main/inst/extdata/bn_kpg_level_data.csv"><i class="bi bi-database"></i>Brunei Spatial Area Data</a></span></div></div></div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-full toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">      
+
+     <div class="cell-container"><div class="cell-decorator"><pre>In [1]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remotes::install_github("AlbertRapp/tidychatmodels")</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidychatmodels)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: Before starting, ensure to install Ollama (https://ollama.com), and use</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># the terminal to download the model you wish to use. Here, we use llama3.2.</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample description (artificially created)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">🌟 MODERN DOUBLE STOREY DETACHED HOUSE FOR SALE — TUNGKU 🌟</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">🏡 Prime Location: Nestled in the heart of Kampong Tungku, just a 5-minute drive to The Mall Gadong, this property offers a blend of modern design and urban convenience.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">✨ Property Details:</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Land Title: In-Perpetuity</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Selling Price: $350,000</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Land Size: 0.15 acre</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="st">    •   House Size: 3,000 sq. ft</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Bedrooms: 4</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Bathrooms: 4</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="st">✨ House Features:</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="st">    •   Ground Floor: Spacious Living &amp; Dining Area, Wet &amp; Dry Kitchen, 1 Guest Bedroom (en-suite), Guest Toilet, Laundry Room.</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="st">    •   First Floor: Master Bedroom (en-suite with walk-in closet + balcony), 2 Bedrooms (en-suite).</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="st">🚗 Parking: Car porch fits 2 cars.</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="st">🌳 Nearby Amenities: Schools, hospitals, cafes, and parks all within a 10-minute radius.</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="st">📲 Contact Us Today!</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="st">For viewing and further details, please contact:</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="st">📞 +673 xxxxxxx | 📱 WhatsApp: +673 xxxxxxx</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="st">📧 email@example.com</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="st">🛠️ Services We Provide:</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="st">    •   🏦 Bank Loan Application Assistance</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="st">    •   📑 Legal Documentation Support</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="st">AGENT 🏘️ – Your Trusted Real Estate Partner</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co"># The prompt</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>the_prompt <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="st">The following is the description from a property sale listing in Brunei. This description will contain the information about the property, including its characteristics, price, and location. However, some of these descriptions may not contain property listings, and instead contain other or no information at all.</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="st">In the case where this description is in fact a property listing, I would like you to extract the following information:</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="st">1. Location / area of the property in Brunei, CHARACTER.</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="st">2. Price of the property in Brunei Dollars, NUMERIC.</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="st">3. Type of property, CHARACTER -- select from Detached, Semi-Detached, Terrace, Apartment, or Land.</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="st">4. Land tenure, CHARACTER -- select from Freehold, Leasehold, or Strata. If other than this, return 'NA'.</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="st">5. Status of the property, CHARACTER -- select from Proposed, Under Construction, New, or Resale.</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="st">6. Land area in acres, NUMERIC.</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="st">7. Built up area in square feet, NUMERIC.</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="st">8. Number of storeys, INTEGER.</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="st">9. Number of bedrooms, INTEGER.</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="st">10. Number of bathrooms, INTEGER.</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="st">Further instructions:</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="st">- Please return **semicolon** separated values like this:</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="st">  Kg Tanah Jambu; 250000; Detached; Freehold; New; 0.3; 2500; 2;  3; 3</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="st">  Kg Tungku; 300000; Terrace; Leasehold; Resale; 0.25; 1700; 2;  3; 2 </span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="st">  Kg Kiarong; 200000; Apartment; Strata; Proposed; 0.1; 1000; NA; 2; 2</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="st">  etc.</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="st">  NUMBERS SHOULD NOT CONTAIN comma (,) for thousands separator</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="st">- If any of the 10 values are missing, please return 'NA' for that value.</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="st">- If the description does not contain a property listing (for example, it is a rental property advertisement), return 'NA' for all 10 values.</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="st">- DO NOT RESPOND WITH ANYTHING ELSE OTHER THAN THE REQUIRED INFORMATION.</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="st">------------------------------</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to clean the descriptions</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>clean_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(caption) {</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">create_chat</span>(<span class="st">"ollama"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_model</span>(<span class="st">"llama3.2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_message</span>(<span class="fu">paste0</span>(the_prompt, caption)) <span class="sc">|&gt;</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">perform_chat</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    <span class="fu">extract_chat</span>(<span class="at">silent =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(role <span class="sc">==</span> <span class="st">"assistant"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">pull</span>(message)</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co"># Test Ollama works</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="fu">create_chat</span>(<span class="st">"ollama"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(<span class="st">"llama3.2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_message</span>(<span class="st">"Hello, how are you?"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">perform_chat</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_chat</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>User: Hello, how are you?
+Assistant: I'm just a language model, so I don't have emotions or feelings like
+humans do, but I'm functioning properly and ready to help with any questions or
+tasks you may have. How can I assist you today?</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the function</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">clean_desc</span>(x),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in microbenchmark::microbenchmark(y &lt;- clean_desc(x), times = 10): less
+accurate nanosecond times to avoid potential integer overflows</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: seconds
+               expr      min      lq     mean   median       uq      max neval
+ y &lt;- clean_desc(x) 1.080241 1.16467 1.359086 1.167528 1.177415 3.179234    10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Next, might want to map this function to a column of descriptions in a data</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># frame, like so:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># cleaned_descriptions &lt;-</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   map(</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     .x = hsp$desc,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#     .f = possibly(clean_desc, NA),</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     .progress = TRUE</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   )</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># In any case, to convert the (cleaned) character vector to a data frame, we</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># separate the strings by ';' as follows:</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">clean =</span> y) <span class="sc">|&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    clean,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"location"</span>, <span class="st">"price"</span>, <span class="st">"type"</span>, <span class="st">"tenure"</span>, <span class="st">"status"</span>, <span class="st">"plot_area"</span>, <span class="st">"floor_area"</span>, <span class="st">"storeys"</span>, <span class="st">"beds"</span>, <span class="st">"baths"</span>),</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">";"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(plot_area<span class="sc">:</span>baths, as.numeric))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+<div class="cell-container"><div class="cell-decorator"><pre>In [2]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gt<span class="sc">::</span><span class="fu">gt</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="zaumatuuhn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zaumatuuhn table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#zaumatuuhn thead, #zaumatuuhn tbody, #zaumatuuhn tfoot, #zaumatuuhn tr, #zaumatuuhn td, #zaumatuuhn th {
+  border-style: none;
+}
+
+#zaumatuuhn p {
+  margin: 0;
+  padding: 0;
+}
+
+#zaumatuuhn .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#zaumatuuhn .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#zaumatuuhn .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#zaumatuuhn .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#zaumatuuhn .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#zaumatuuhn .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#zaumatuuhn .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#zaumatuuhn .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#zaumatuuhn .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#zaumatuuhn .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#zaumatuuhn .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#zaumatuuhn .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#zaumatuuhn .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#zaumatuuhn .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#zaumatuuhn .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zaumatuuhn .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#zaumatuuhn .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#zaumatuuhn .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#zaumatuuhn .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zaumatuuhn .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#zaumatuuhn .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zaumatuuhn .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#zaumatuuhn .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zaumatuuhn .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zaumatuuhn .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zaumatuuhn .gt_left {
+  text-align: left;
+}
+
+#zaumatuuhn .gt_center {
+  text-align: center;
+}
+
+#zaumatuuhn .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#zaumatuuhn .gt_font_normal {
+  font-weight: normal;
+}
+
+#zaumatuuhn .gt_font_bold {
+  font-weight: bold;
+}
+
+#zaumatuuhn .gt_font_italic {
+  font-style: italic;
+}
+
+#zaumatuuhn .gt_super {
+  font-size: 65%;
+}
+
+#zaumatuuhn .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#zaumatuuhn .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#zaumatuuhn .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#zaumatuuhn .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#zaumatuuhn .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#zaumatuuhn .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#zaumatuuhn .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#zaumatuuhn .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#zaumatuuhn div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="clean">clean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="location">location</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="price">price</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="type">type</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="tenure">tenure</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="status">status</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="plot_area">plot_area</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="floor_area">floor_area</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="storeys">storeys</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="beds">beds</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="baths">baths</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="clean" class="gt_row gt_left">Kampong Tungku; 350000; Detached; In-Perpetuity; New; 0.15; 3000; 2; 4; 4</td>
+<td headers="location" class="gt_row gt_left">Kampong Tungku</td>
+<td headers="price" class="gt_row gt_right"> 350000</td>
+<td headers="type" class="gt_row gt_left"> Detached</td>
+<td headers="tenure" class="gt_row gt_left"> In-Perpetuity</td>
+<td headers="status" class="gt_row gt_left"> New</td>
+<td headers="plot_area" class="gt_row gt_right">0.15</td>
+<td headers="floor_area" class="gt_row gt_right">3000</td>
+<td headers="storeys" class="gt_row gt_right">2</td>
+<td headers="beds" class="gt_row gt_right">4</td>
+<td headers="baths" class="gt_row gt_right">4</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+</div></div>
+     </main>
+<!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>  </div> <!-- /content --> 
+  
+</body></html>
