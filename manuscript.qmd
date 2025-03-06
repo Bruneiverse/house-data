@@ -1,0 +1,585 @@
+---
+title: 'From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam'
+authors:
+  - name: Haziq Jamil
+    orcid: 0000-0003-3298-1010
+    email: haziq.jamil@ubd.edu.bn
+    url: 'https://haziqj.ml'
+    corresponding: true
+    affiliations:
+      - name: Universiti Brunei Darussalam
+        id: ubd
+        department: Mathematical Sciences, Faculty of Science
+        address: Universiti Brunei Darussalam, Jalan Tungku Link
+        city: Bandar Seri Begawan
+        country: Brunei
+        postal-code: BE 1410
+  - name: Amira Barizah Noorosmawie
+    affiliations:
+      - ref: ubd        
+  - name: Hafeezul Waezz Rabu
+    affiliations:
+      - ref: ubd
+  - name: Lutfi Abdul Razak
+    orcid: 0000-0003-1681-0895
+    email: lutfi.razak@ubd.edu.bn
+    affiliations:
+      - name: UBD School of Business and Economics
+        id: ubdsbe
+        # department: Mathematical Sciences, Faculty of Science
+        address: Universiti Brunei Darussalam, Jalan Tungku Link
+        city: Bandar Seri Begawan
+        country: Brunei
+        postal-code: BE 1410         
+date-modified: last-modified
+abstract: |
+  This article introduces the first publicly available data set for analysing the Brunei housing market, covering more than 30,000 property listings from 1993 to early 2025. The data set, curated from property advertisements in newspapers and online platforms, includes key attributes such as price, location, property type, and physical characteristics, enriched with area-level spatial information. Comprehensive and historical, it complements the Brunei Darussalam Central Bank’s Residential Property Price Index (RPPI), addressing the limitations of restricted access to raw RPPI data and its relatively short timeline since its inception in 2015. Data collection involved manual transcription from archival sources and automated web scraping using programmatic methods, supported by innovative processing with Large Language Models (LLMs) to codify unstructured text. The data set enables spatial and temporal analysis, with potential applications in economics, urban planning, and real estate research. Although listing prices are only a proxy for market values and may deviate from actual sale prices due to negotiation dynamics and other factors, this data set still provides a valuable resource for quantitative analyses of housing market trends and for informing policy decisions.
+keywords:
+  - Housing Market
+  - Brunei
+  - Property Listings
+  - Spatial Data
+  - Web Scraping
+  - Large Language Models
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+#| eval: true 
+#| file: notebooks/data.R
+```
+
+```{r}
+#| include: false
+years <- lubridate::year(hsp$date)
+max(years) - min(years) + 1
+```
+
+<!-- > Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain data sets with insufficient variables or samples. -->
+
+# Value of the Data
+
+<!-- This section states why these data are of value to the scientific community. Please provide between 3 and 6 bullet points and answer at least the questions below (delete the questions afterwards). Each bullet point should be a maximum of 150 words long, and should not include conclusions or inferences: -->
+<!-- - Why are these data valuable? -->
+<!-- - How can these data be reused by other researchers? -->
+<!-- - ... -->
+
+- **A first-of-its-kind data set for Brunei**. This data set is the first publicly available compilation of Brunei’s residential property data, covering `{r} scales::comma(nrow(hsp))` listings from `r min(years)` to early `r max(years)`. Previous studies on Brunei's housing have either relied on recent or non-spatial data [@ng2022characterising;@jamil2025leveraging], or have primarily employed qualitative methods due to the absence of structured data [@hassan2011cultural;@hassan2023sociocultural]. Researchers may use this data to explore temporal variations in property listings and to compare housing characteristics across different regions within Brunei.
+
+- **Historical and spatial insights**. Spanning over three decades, this data set enables analysis of long-term housing trends at various administrative levels in Brunei, providing insights into urban development patterns, regional differences, and the evolution of housing characteristics over time. This historical depth is particularly valuable given the lack of data prior to the establishment of the Residential Property Price Index (RPPI) [@bdcb2021technical] in 2015.
+
+- **Methodological innovation in data curation**. The data collection process employs a unique combination of manual transcription from archival sources, automated web scraping, and AI-based data cleaning using Large Language Models (LLMs). This multi-method approach offers a reproducible framework for assembling complex data sets, which can be adapted for similar data collection efforts in other domains, thereby advancing best practices in the field.
+
+<!-- - **Influence on economic and monetary policies**. Analysing the real estate market is crucial because the RPPI can potentially play a key role in shaping monetary policy and assessing economic stability. Changes in RPPI signal inflationary pressures, providing guidance to the central bank decisions. Developing a house price index using advertised prices, as explored by @rachman2019residential, aligns with practices in other countries, such as the UK’s House Price Index developed by Rightmove PLC [@hmlandregistry2023comparing; @europeancommission.eurostat2013handbook]. This data set demonstrates how computational methods can automate what is typically a time-consuming and labour-intensive process. -->
+
+- **Opportunities for handling of missing data**. The data set includes instances of missing data, particularly in house characteristics, which present opportunities for further research on data imputation techniques. Researchers may explore advanced statistical and machine learning methods to address missing values and improve data reliability. The structured format and detailed documentation of the data set support such methodological investigations, making it a valuable testbed for developing and evaluating new approaches to handling incomplete data in real-world data sets.
+
+# Background
+
+<!-- Please describe your original motivation and context behind compiling this data set. For example, briefly include information on the theoretical or methodological background against which you generated the data. Do not make concluding, interpretive, or otherwise inferential statements about the data set. In case your data article is related to an original research article, please briefly describe how the data article adds value to the published article (Max. 200 words). -->
+
+The housing market is a key indicator of economic health and social well-being, yet comprehensive and publicly accessible data sets in Brunei remain limited. 
+To the best of our knowledge, this is the first data set of its kind in Brunei, motivated by the need to fill the gap in publicly available local housing market data.
+
+Currently, the Brunei Darussalam Central Bank (BDCB) produces a Residential Property Price Index (RPPI) [@bdcb2021technical] using data sourced from financial institutions, such as bank loan data sets. 
+While the RPPI is published quarterly, the underlying raw data is not publicly available due to privacy restrictions. 
+This limits research opportunities and transparency in understanding broader housing market trends. 
+Furthermore, since the RPPI only began in 2015, historical housing data for Brunei is lacking.
+
+We address these challenges by providing a cost-effective and timely means to collect and analyse housing market data. 
+Covering records from 1993 onward, it offers historical depth that complements–and extends beyond–the RPPI. 
+It is valuable not only for tracking property price trends but also for advancing research in economics, urban planning, and real estate, supporting informed decision-making across sectors.
+
+# Data Description
+
+<!-- This section describes your data set. Refer to all the data folders, subfolders, and files in the repository individually, irrespective of whether they relate to raw or analyzed data, and make sure that the reader can follow the structure of your data set. -->
+<!-- Please use visual aids (such as tables, graphs, or figures with captions) to familiarize the reader with your data set, but do not offer background, interpretations, or conclusions. -->
+
+The data has been curated into a single Comma-Separated Values (CSV) file named `hspbn_2024-12-12.csv`. 
+The data set contains `{r} scales::comma(nrow(hsp))` property listing records which are enriched with area-level geotagged spatial information, spanning a period of `{r} max(years) - min(years) + 1` years from `{r} format(min(hsp$date), "%b %Y")` to `{r} format(max(hsp$date), "%b %Y")`. 
+The `{r} scales::comma(ncol(hsp))` columns of this data set capture information for each property listing as detailed in @tbl-codebook below.
+
+```{r}
+#| include: false
+codebook_gt <-
+  readxl::read_xlsx("data/codebook.xlsx") |>
+  rownames_to_column("No.") |>
+  gt(rowname_col = "No.") |>
+  fmt_markdown(c("Variable", "Details"))
+```
+
+
+::: {#tbl-codebook}
+
+::: {.content-visible unless-format="pdf"}
+```{r}
+#| html-table-processing: none
+codebook_gt
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r}
+codebook_gt |>
+  tab_options(table.font.size = 12) |>
+  cols_width(Details ~ px(400)) |>
+  as_latex()
+```
+:::
+
+Codebook for the house price data set.
+:::
+
+## Property Characteristics
+
+The data set includes a range of property characteristics suitable for exploring the relationship between property attributes and prices. 
+This section clarifies and provides context for the key variables in the data set.
+
+Brunei’s private residential property market offers a variety of options, including detached houses, townhouses, and apartments [@hassan2023sociocultural]. 
+Based on this diversity, property types have been categorised into four main groups--Detached, Semi-Detached, Terrace, and Apartment--to accurately reflect the range of residential properties in Brunei.
+Additionally, there are a small number of records that reflect listings for land, which are categorised accordingly as "Land".
+
+Property tenure refers to the legal terms under which a person holds ownership or occupancy rights to a property. 
+In Brunei, property tenure can be classified into three main categories: Freehold (in perpetuity), Leasehold, and Strata. 
+The latter two refer to a limited time-limited ownership, although details about the remaining duration of the tenure are almost never included in property listings. 
+Strata titles differ from Leasehold titles in that they grant ownership of a specific portion of a property, such as an apartment, while sharing ownership of common areas.
+
+The data set also includes information on the status of the property listing, indicating whether the advertisement refers to a proposed development, a newly completed development, or a property being resold. 
+This categorical variable may be useful for analysing price differences across different types of listings. 
+While the exact age of properties being resold would be invaluable for such analyses, this information is rarely included in advertisements. 
+Instead, the listing status may serve as a useful proxy for property age.
+
+The numerical variables in the data set are plot area, floor area, storeys, beds, and baths, each providing information on the physical attributes of the property. 
+Note that plot area is measured in acres, while floor area in square feet, as these are the units most familiar and commonly used in Brunei. 
+Users of this data set may choose to convert these units as needed for their analysis.
+
+Finally, metadata about the property is included for transparency and informational purposes. 
+The variable `agent` specifies the (anonymised) identifier of the real estate agent or agency responsible for the listing, while `source` identifies the platform or medium from which the listing was obtained, such as a newspaper, magazine, or website. 
+The `method` variable details the data collection approach, which is further elaborated in the section below.
+
+```{r}
+#| include: false
+tbl_summary <- 
+  hsp |>
+  mutate(
+    price = price / 1000,
+    storeys = factor(
+      ifelse(storeys >= 3, "3+", as.character(storeys)),
+      levels = c("1", "2", "3+")
+    ),
+    district = gsub("Brunei Muara", "Brunei-Muara", district),
+    district = factor(district, levels = c("Brunei-Muara", "Belait", "Tutong", "Temburong"))
+  ) |>
+  tbl_summary(
+    include = c(price:baths),
+    by = district,
+    missing = "no", 
+    type = all_continuous() ~ "continuous2",
+    statistic = list(
+      all_continuous2() ~ c("{mean} ({sd})", Range = "{min} - {max}", "{median} ({p25}, {p75})")
+    ),
+    label = list(
+      price = "Price (BND 1,000)",
+      type = "Property type",
+      plot_area = "Plot area (acres)",
+      floor_area = "Floor area (sq. ft.)",
+      storeys = "Number of storeys",
+      status = "Development status",
+      tenure = "Land tenure",    
+      beds = "Number of bedrooms",
+      baths = "Number of bathrooms"
+    ),
+    digits = list(
+      baths = 1,
+      beds = 1
+    )
+  ) |>
+  add_overall() |>
+  add_n() |>
+  modify_header(label ~ "**Variable**") |>
+  as_gt()
+```
+
+:::: {.content-visible when-format="html"}
+::: column-page
+::: {#tbl-summary}
+```{r}
+#| html-table-processing: none
+tbl_summary
+```
+Summary of housing data.
+:::
+:::
+::::
+
+:::: {.content-visible unless-format="html"}
+::: landscape
+::: {#tbl-summary}
+```{r}
+#| html-table-processing: none
+tbl_summary |>
+  tab_options(table.font.size = "9px")
+```
+Summary of housing data.
+:::
+:::
+::::
+
+## Spatial Information
+
+In Brunei Darussalam, the administrative areas are organised hierarchically into three levels. 
+At the smallest level is the *kampong*, the Malay word for village.
+While a typical village refers to a traditional rural settlement, it is also used to describe an urbanised area located within or near the capital city or a town. 
+It may even refer to a part of public housing estates. Several kampongs grouped together form a *mukim*, which serves as a sub-district administrative area. 
+Finally, multiple mukims are nested within a *district*, the largest administrative unit, of which Brunei has four:
+Brunei-Muara, Belait, Tutong, and Temburong. 
+In our data set, each property listing is associated with a specific kampong, mukim, and district, allowing for spatial analysis at different scales.
+
+Importantly, the names of the kampongs, mukims, and districts have been harmonised with a standardised naming convention to ensure consistency across the data set. 
+This also allows for ease of integration into Geographic Information Systems (GIS) software for spatial analysis and visualisation, namely the `{bruneimap}` R package [@jamil2024bruneimap].
+
+{{< embed notebooks/analysis.qmd#fig-spatial >}}
+
+## Listing Dates
+
+The `date` variable represents the date on which the property listing was obtained, rather than the date of sale or transaction, and should be interpreted as a snapshot of market conditions at a given point in time.
+For analysis, we recommend aggregating data by quarters, as represented by the `quarter` variable. 
+This aggregation helps address potential issues like missing data (see subsection below) and provides a more stable and robust representation of market trends, making it suitable for temporal analysis of the housing market.
+
+{{< embed notebooks/analysis.qmd#fig-price-evolution >}}
+
+## Missing Values
+
+In any data collection effort, it is unsurprising to encounter missing data. 
+Likewise in our data set, missing values occur across several property characteristics--such as plot area, floor area, beds, baths, and others.
+A preliminary analysis of the missing data patterns indicates that the missingness is not completely random, with certain variables displaying dependencies on others.
+Advertisers often include only the information they deem most marketable or necessary, while other details may be omitted if they are considered standard or implied. 
+For instance, a listing might specify the square footage and price but leave out the number of bedrooms and bathrooms, assuming that prospective buyers are able to infer these details.
+
+{{< embed notebooks/missing.qmd#fig-missing-pattern >}}
+
+Missing values are represented by blank cells in the CSV file, and the severity of missingness is summarized in @tbl-avail. 
+In total, 10.1% of the records contain missing values for all key house characteristics (i.e. plot area, floor area, beds, and baths), which, depending on the research question, may require imputation or the exclusion of these records.
+
+# Experimental Design, Materials and Methods {#sec-method}
+
+<!-- This section describes how you acquired the data. Provide a complete description of the experimental design and methods used to acquire these data. For example, include all code (files) and software used for data analysis or data generation, and describe tools, instruments, and experimental conditions.  -->
+<!-- It is important that this section is as comprehensive as possible. There is no character limit, and you may use illustrative figures or tables; however, please do not offer background, interpretations, or conclusions. -->
+
+In this section we describe the data collection process, which involved either a manual transcription of property listings from newspapers, or web scraping of online property agent listings. 
+The data collection method varied over the years due to the availability of data sources and the evolution of technology. 
+For the later years, a large language model (LLM) was also employed to perform data cleaning on the web scraped data. 
+@tbl-avail details which method was used for each year in the data set, and whether the data was subjected to LLM post-processing.
+
+All analyses were conducted using the R programming language [@rcoreteam2024language], with specific packages used described in each subsection below.
+
+{{< embed notebooks/analysis.qmd#tbl-avail >}}
+
+## Manual Data Collection
+
+Early years data collection was conducted manually, involving the transcription of property listing details from advertisements into a digital tabular format. 
+This process was carried out by two of the authors over a period of nine months, from October 2023 to July 2024, working at a manageable pace.
+A total of `{r} scales::comma(sum(hsp$method %in% c("nat-archive", "online-archive")))` data points were collected in this manner, which translates to processing approximately 150 entries per week per person.
+Spreading the task over such an extended period ensured that transcribers were never under undue time pressure, which could have led to errors due to fatigue.
+
+The primary sources of the property listings were local newspapers and magazines. 
+Physical copies were accessed through the National Archive of Brunei Darussalam, while digital versions, which are digitised replicas of the physical newspapers, were obtained online. 
+These digital formats could not be scraped due to their lack of structured data, necessitating manual transcription.
+
+Although daily newspapers from 1993 onward were available at the National Archive, the classified sections were not always present.
+From 1993 to 1999, property advertisements were found only in Friday editions, and occasionally on Saturdays. 
+Thus, newspapers from both these days were reviewed weekly to capture the listings data. 
+This yielded roughly between 300 and 700 listings per year.
+
+From the year 2000 onwards, property advertisements were published daily in the classifieds section. 
+However, reviewing every single daily edition was not practical and would increase the likelihood of recording duplicate listings, thus necessitating a sampling strategy. 
+The sampling was done as follows. Three newspaper editions per week were selected, and the classifieds section was reviewed for property listings. 
+When a listing was found, it was recorded after careful filtering to ensure it was unique. 
+This manual filtering process involved cross-checking based on the real estate agent, house characteristics, price, location, and date proximity. 
+To avoid duplication, the same house listing was not recorded more than once within a quarter. 
+This process yielded roughly the same number of listings per year as the earlier years.
+
+## Web Scraping
+
+To compile additional property data for the study beyond manual data collection, web scraping was employed using the R programming language, making use of the `{rvest}` package [@wickham2024rvest].
+This method enabled the systematic extraction of structured information from various local property listing websites such as panvilla.com (now defunct), bruhome.com, and bruneiproperty.com.bn.
+Such websites provide extensive details on properties listed as "for sale" in Brunei, aggregating advertisements from real estate agents and property developers.
+
+::::: {#fig-web-scrape layout-ncol="1"}
+::: {#fig-mockup-listing}
+![A mockup of the structure of property listing showing various HTML elements.](figures/house-mockup1.png)
+:::
+
+::: {#fig-mockup-table}
+![Example paragraph containing description within the "See Details" link for each property.](figures/house-mockup2.png)
+:::
+
+Illustration of a property listing from a typical Bruneian property portal. Attribution: Freepik.
+:::::
+
+The process began by identifying the structure of the target websites, focusing on the HTML tags and classes containing the relevant information. 
+The goal here is to programmatically pinpoint and collect specific information like text, links, or attributes. 
+For example, elements such as property prices, number of bedrooms, bathrooms, location, and other features were enclosed within specific HTML elements, which `{rvest}` functions like `html_elements()` and `html_text2()` could target and extract efficiently. 
+@fig-mockup-listing illustrates the structure of a typical property listing showing the various HTML elements to target. 
+Example code to perform this task in available in the repository.
+
+Each webpage displayed a fixed number of listings (e.g. 128 per page). 
+To scrape all pages, a loop was created to iterate through each page by modifying the URL (such as with an `&offset=<number>` parameter, where `<number>` represents the cumulative number of listings already scraped).
+
+Extracted data required some cleaning to standardise formats for analysis. 
+Specifically:
+
+- `price` variables were cleaned by removing non-numeric characters and converted to integers.
+- `beds` and `baths` were converted to integers.
+- `date` variables were formatted properly as `Date` objects.
+- Locations were stored as text strings. See the subsection below on spatial data harmonisation.
+- Any additional information was extracted from the property descriptions and saved as a character vector. This very often contained valuable insights not captured in the primary fields.
+
+Data from 2012 up until the present (January 2025) were managed to be collected using this method, averaging around 1,500 listings per year. 
+While highly efficient, this process relied heavily on the consistency of the site structure of the source webpages. Changes to website layouts or closures over time required significant updates to the scraping scripts. 
+To overcome these issues, alternative approaches, such as using Large Language Models (LLMs) were considered. 
+This is explained in the next subsection.
+
+## LLM Data Extraction
+
+As previously mentioned, the web scraping process also captured unstructured information from the property descriptions, which often contained valuable details not captured in the primary fields. 
+In this subsection, we detail the data extraction process using a pre-trained Large Language Model (LLM) to extract structured information from the unstructured text. 
+<!-- The LLM used was the cloud-based OpenAI o1-mini reasoning model[^1], accessed using the `{ellmer}` R package [@wickham2025ellmer] via an API. -->
+The LLM used was the DeepSeek R1 distilled Qwen 14B [@deepseek2025deepseekr1;@qwen2025qwen25], accessed using the `{ellmer}` R package [@wickham2025ellmer] via the Ollama[^2] API, a local interface platform to the LLM.
+
+<!-- [^1]: <https://openai.com/index/openai-o1-mini-advancing-cost-efficient-reasoning/> -->
+[^2]: <https://github.com/ollama/ollama>
+
+The primary goal was to extract the house characteristics of interest, specifically variables 7 to 15 as per @tbl-codebook, from the unstructured verbose descriptions scraped from property listing websites. 
+Each description was processed with a carefully designed prompt (@fig-llm-prompt) to ensure consistent output. 
+This prompt instructed the model to return only the required information in a semicolon-separated format, while handling edge cases such as missing descriptions or non-residential (commercial) properties.
+
+::: {#fig-llm-prompt}
+```{r}
+#| echo: true
+#| eval: false
+#| code-overflow: wrap
+"The following is the description from a property sale listing in Brunei. This 
+description will contain the information about the property, including its 
+characteristics, price, and location. However, some of these descriptions may 
+not contain property listings, and instead contain other or no information at 
+all.
+
+In the case where this description is in fact a property listing, I would like 
+you to extract the following information:
+
+1. Location / area of the property in Brunei, CHARACTER.
+2. Price of the property in Brunei Dollars, NUMERIC.
+3. Type of property, CHARACTER -- select from Detached, Semi-Detached, Terrace, 
+Apartment, or Land.
+4. Land tenure, CHARACTER -- select from Freehold, Leasehold, or Strata. If 
+other than this, return 'NA'.
+5. Status of the property, CHARACTER -- select from Proposed, Under 
+Construction, New, or Resale.
+6. Land area in acres, NUMERIC.
+7. Built up area in square feet, NUMERIC.
+8. Number of storeys, INTEGER.
+9. Number of bedrooms, INTEGER.
+10. Number of bathrooms, INTEGER.
+
+Further instructions:
+
+- Please return **semicolon** separated values like this:
+
+  Kg Tanah Jambu; 250000; Detached ; Freehold ; New     ; 0.3 ; 2500; 2;  3; 3
+  Kg Tungku     ; 300000; Terrace  ; Leasehold; Resale  ; 0.25; 1700; 2;  3; 2 
+  Kg Kiarong    ; 200000; Apartment; Strata   ; Proposed; 0.1 ; 1000; NA; 2; 2
+  etc.
+  NUMBERS SHOULD NOT CONTAIN comma (,) for thousands separator
+
+- If any of the 10 values are missing, please return 'NA' for that value.
+
+- If the description does not contain a property listing (for example, it is a 
+rental property advertisement), return 'NA' for all 10 values.
+
+- DO NOT RESPOND WITH ANYTHING ELSE OTHER THAN THE REQUIRED INFORMATION."
+```
+
+The LLM prompt to clean descriptions obtained from web scraping.
+:::
+
+The verbose descriptions were fed into the model one at a time using a loop, with the LLM extracting and returning the relevant details. 
+Note that this loop was not parallelised, as the LLM already utilises multiple cores, and further parallelisation would not yield significant efficiency gains due to resource constraints.
+The cleaned results were then parsed and stored in a data frame, which was then subjected to manual data-type validation to ensure conformity with the existing data set (see the last subsection). 
+It takes, on average, 81.7 seconds to process a single description using a Mac Pro 3.2GHz 16 core Intel Xeon W with 48GB of DDR4 RAM.
+We processed `{r} scales::comma(sum(hsp$method %in% c("web-scrape-llm")))` descriptions from 2020 to 2025 using this method, with a run time of approximately 20 hours in total (spread over three machines).
+
+To evaluate the accuracy of the LLM data extraction, a test data set of 100 artificially generated descriptions was created, with each description written in the style of a typical property listing.
+For each house characteristic, the accuracy of the LLM was calculated by comparing the extracted value to the ground truth.
+For numeric variables, values were considered accurate if they fell within 1% of the corresponding ground truth value. 
+For character variables, accuracy was determined using the normalised Levenshtein distance, ensuring differences remained within a set threshold. 
+The test data also contained missing information in certain property characteristics, which the LLM was expected to handle correctly.
+A correct handling was counted if both the extracted and ground truth values were missing. 
+Accuracy was then averaged per characteristic as well as across all characteristics.
+
+Our experiments show that the LLM data extraction process with the deepseek-r1:14b model achieved an overall accuracy rate of 96.9% (see Appendix for complete results).
+Errors mostly stemmed from incorrect `status` classification, likely due to the vagueness of the advertisement listing.
+As for the rest of the variables, obvious errors were flagged and corrected manually during our data validation process (described in the subsection following the next one).
+Overall, the LLM was found to be a valuable tool for extracting structured information from unstructured text, significantly reducing the time and effort required for data extraction. 
+<!-- Users may wish to exclude these records from their analysis if they are concerned about the accuracy of the extracted data. -->
+
+## Spatial Data Harmonisation {#sec-spatial-harm}
+
+Whether the data was collected manually, through web scraping, or cleaned using the LLM, the spatial information extracted was often inconsistent in terms of naming conventions and granularity. 
+To address this, a spatial data harmonisation process was conducted to standardise the names of the kampongs (villages) in the data set to the format used by Department of Economic Planning and Statistics (DEPS), Ministry of Finance and Economy, Brunei Darussalam as per the most recent census [@deps2022population]. 
+This is the same format used by the R package `{bruneimap}` [@jamil2024bruneimap].
+The CSV file `bn_kpg_level_data.csv` obtained from this package was used as a reference to standardise the kampong names in the data set, which conveniently also includes the mukim and district names for each kampong.
+
+The majority of house listings in Brunei specify the property location using the kampong name, the smallest administrative unit in the country. 
+The task in hand was then to match these kampong names in the data set with the standardised names in the reference file. 
+Several challenges were encountered during this process, including:
+
+1. Spelling variations or misspellings, though these were relatively straightforward to correct.
+2. Unknown entries, where the correct kampong could sometimes be inferred from the geographical context; otherwise, these were set to `NA`.
+3. Multiple matches, occurring when two or more kampongs shared the same name (e.g., Kampong Panchor in Mukim Mentiri and Kampong Panchor in Mukim Lumapas). Additional information from the listing was used to determine the correct match, but where this was not possible, these entries were also set to `NA`.
+
+This process was carried out manually using data filtering features in Microsoft Excel. 
+Once completed, all entries marked as `NA` were removed so as to provide complete spatial information for each listing.
+
+## Data Validation {#sec-data-validation}
+
+To ensure data quality, a series of consistency and validity checks were performed on the data set, especially after manual transcription and LLM data cleaning.
+These checks include
+
+1. **Outlier detection.** Summary statistics analyses to identify and flag anomalous values. For instance, a built-up area recorded as 0.1 square feet or an implausibly high number of beds and baths (e.g., >20) would highly likely indicate a possible error, prompting manual review. Such anomalies were flagged and manually reviewed for correction.
+2. **Internal consistency checks.** This made use of substantive knowledge about Brunei's housing market [@jamil2025spatiotemporal]. An example is using the price per square foot indicator, whose value typically falls within a known range. Therefore any deviations were scrutinised to ensure that variables such as price and floor area were correctly recorded. This was similarly applied to other variables such as plot area, beds, and baths.
+3.	**Duplicate records detection.** We also performed duplicate record detection to identify any repeated entries that might have arisen from overlapping data sources or transcription errors. Any duplicates that were identified were carefully reviewed and removed to ensure that each property listing was uniquely represented in the span of one calendar month.
+
+These data validation procedures collectively contribute to a robust and reliable data set, providing a solid foundation for subsequent analysis.
+
+# Limitations
+
+<!-- Describe any limitations related to the data described in this article. These could be any problems you faced during data collection or curation, limited quality or size of data set, data biases, etc., but should not include limitations of analysis conducted or interpretation (Max. 200 words). If there are none, please write ‘None’ or ‘Not applicable’. -->
+
+Listing prices in our data set serve as a proxy for market values, capturing advertised trends rather than final sale outcomes. 
+This enables timely analysis of market sentiment, even though factors such as negotiation dynamics, seller strategies, and market conditions may cause deviations from actual transaction prices. 
+
+Despite significant efforts to ensure data quality, some limitations remain. 
+First, integrating historical data from manually transcribed sources with later web-scraped data may introduce inconsistencies affecting comparability over time. 
+Second, although duplicate listings were carefully reviewed and removed, there remains a slight possibility of residual duplicates in the data set.
+<!-- Thirdly, the spatial distribution is heavily skewed toward the Brunei-Muara district--reflecting its higher population and transaction volume [@jamil2025spatiotemporal]--which may bias regional analyses. -->
+Thirdly, while we have confidence in the data quality from 2015 to 2024, property price trends between 1993 and 2014 cannot be fully verified. 
+Nonetheless, this study serves as a valuable starting point.
+Future research could benefit greatly from access to administrative transaction data, which would allow for more comprehensive and accurate analyses.
+
+Finally, while significant effort was made to harmonise spatial data, the matching of kampong names to standardised references may not be entirely error-free. 
+However, aggregation to the mukim level provides a reliable alternative for spatial analyses, ensuring that the data set remains valuable for research and analysis.
+
+# Ethics
+
+<!-- Data in Brief’s Guide for Authors contains detailed information on the ethical guidelines with which all authors must comply. In addition, we ask you to complete the relevant statement(s) below.  Please delete those which are not relevant for your data. -->
+<!-- If your work involved human subjects, please include a statement here confirming that the relevant informed consent was obtained from those subjects, if the research was carried out in accordance with the Declaration of Helsinki, and if it includes the Ethical committee approval and the protocol number. A copy of the consent form (in English) can be submitted either in a data repository or under the section ‘Consent form’ while submitting the manuscript to the system. -->
+<!-- If your work involved animal experiments, please include a statement here confirming that those experiments complied with the ARRIVE guidelines and were carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines; EU Directive 2010/63/EU for animal experiments; or the National Institutes of Health guide for the care and use of laboratory animals (NIH Publications No. 8023, revised 1978). Note, the sex of the animals must be indicated, and, where appropriate, the influence (or association) of sex on the results of the study. -->
+<!-- If your work involved data collected from social media platforms, please include a statement here confirming that a) informed consent was obtained from participants or that participant data has been fully anonymized, and b) the platform(s)’ data redistribution policies were complied with. -->
+<!-- If none of the above, please include a statement confirming that the authors have read and follow the ethical requirements for publication in Data in Brief and confirming that the current work does not involve human subjects, animal experiments, or any data collected from social media platforms. -->
+
+The authors confirm that the current work does not involve human subjects, animal experiments, or data collected from social media platforms. 
+The data described in this article were obtained from publicly available, non-personal, and factual sources, including physical and digital newspapers and magazines.
+
+Web scraping from local property listings websites was conducted in compliance with ethical and legal considerations. 
+Specifically, data were not collected from behind login barriers, and the terms of service (ToS) for the websites did not explicitly prohibit web scraping.
+Furthermore, the `robots.txt` files for the websites were reviewed, and any policies outlined there were adhered to.
+
+The data collected consisted exclusively of non-copyrightable factual information, such as property characteristics and spatial locations, and excluded any potentially copyrighted content such as images. 
+To ensure privacy, no personally identifiable information, including specific property addresses, was scraped nor included in the data set. 
+To this end, data from the description fields processed by the LLM are not included in the data set, as they may contain sensitive information such as contact details and names of companies. 
+Furthermore, we have anonymised the names of the real estate agents and companies in the data set.
+
+# CRediT Author Statement
+
+<!-- https://www.elsevier.com/researcher/author/policies-and-guidelines/credit-author-statement  -->
+
+-   **Haziq Jamil**: Conceptualisation, Methodology, Software, Formal analysis, Data curation, Writing-Original Draft, Visualisation, Supervision, Project administration, Funding acquisition.
+-   **Amira Barizah Noorosmawie**: Software, Data curation, Writing-Original Draft.
+-   **Hafeezul Waezz Rabu**: Software, Data curation, Writing-Original Draft.
+-   **Lutfi Abdul Razak**: Conceptualisation, Validation, Supervision, Funding acquisition.
+
+# Acknowledgements
+
+<!-- In this section, mention all contributors who do not meet the criteria for authorship. -->
+<!-- In addition, please list any funding sources in this section. List funding sources in the standard way to facilitate compliance to funder's requirements. -->
+<!-- If no funding has been provided for the research, please include the following sentence: -->
+<!-- This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors. -->
+
+The authors gratefully acknowledge the contributions of Atikah Farhain Yahya, Nurulhanisah Abdul Manan, and Nina Zuhairi towards the collection and processing of the data contained within.
+We also thank the Brunei Darussalam Central Bank (BDCB) for the engaging discussions and support, which were instrumental in the initiation of this project.
+
+# Declaration of Competing Interests
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix {.unnunmbered}
+
+## Pairwise Correlation Plot of Numeric Variables
+
+{{< embed notebooks/analysis.qmd#fig-corr >}}
+
+## Comparison to RPPI Data
+
+To demonstrate the quality of the data set, we compared it with the Residential Property Price Index (RPPI) [@bdcb2021technical] published by the Brunei Darussalam Central Bank (BDCB). 
+A simple median price per square foot (PPSF) index can be calculated by aggregating the data by quarters. 
+This approach minimises the impact of missing values, as the index is based on aggregated data. 
+@fig-rppi shows the comparison between the RPPI and the PPSF index calculated from our data set. 
+The mean absolute error (MAE) between the two indices is calculated to be `{r} scales::percent(rppi_mae[1], accuracy = 0.01)`, indicating a good level of agreement between the two data sets.
+
+{{< embed notebooks/analysis.qmd#fig-rppi >}}
+
+## LLM Accuracy Test {#sec-apx-llm}
+
+To test the accuracy of the LLM data extraction, we created a test data set of 100 house advertisements in the style of the web scraped data.
+Several popular models from Ollama were used, namely the Llama3.2 (3B), Mistral (7B), Phi 4 (14B), and DeepSeek-R1 distilled reasoning models based on Llama (8B) and Qwen (14B).
+For the locally run Ollama models, the settings were set to the default values, with the exception of a lowered temperature setting: `temperature = 0.1`, `top-p=0.9` (nucleus sampling), `top-k=40` (top-k sampling), `max-tokens=128`, and `repeat-penalty=1.1`.
+Additionally, two models from OpenAI were included for comparison.
+These were the GPT-4o and the o1-mini, with the latter being a reasoning model.
+
+OpenAI's models topped the accuracy charts, with the o1-mini and gpt-4o models achieving the accuracy scores of 99.2% and 98.9% respectively.
+The reasoning model deepseek-r1:14b was the best performing locally run model, scoring 96.9% accuracy.
+Evidently, the smaller the model, the less accurate the extraction process (cf. llama3.2 70.8%).
+Most inaccuracies occurred in the `status` variable, where models struggled to parse the correct build status from vague advertisement descriptions.
+However, key variables such as `price`, `type`, `plot_area`, `floor_area`, `beds`, and `baths` are generally reliable (>90% accuracy).
+
+{{< embed notebooks/analysis.qmd#fig-llmtest >}}
+
+The run time statistics for each model is shown in the table below.
+The computer used was a Mac Pro 3.2GHz 16 core Intel Xeon W with 48GB of DDR4 RAM. 
+At the time of running the tests, graphics card support was not available for the LLM models, which would have significantly reduced the run time.
+Certainly cloud-based models such as OpenAI's models are much faster than running models locally, though a paid API key is required.
+
+```{r}
+#| label: tbl-llmtest-time
+#| tbl-cap: Single run time statistics for LLM data extraction for each model in seconds.
+llmtest_time <-
+  tibble(
+    model = c("llama3.2", "mistral", "phi4", "deepseek-r1:8b", "deepseek-r1:14b", "gpt-4o", "o1-mini"),
+    min = c(1.077457, 2.661627, 3.722881, 36.829881, 40.8939, 1.279267, 5.968378),
+    mean = c(6.396146, 10.437078, 14.108101, 65.973720, 117.666112, 2.457973, 7.945925),
+    median = c(9.595035, 2.907932, 4.267815, 54.605889, 81.71249, 1.733497, 7.506522),
+    max = c(10.16348, 22.21225, 38.01499, 112.77667, 151.2027, 5.379483, 9.943231)
+  )
+
+gt(llmtest_time) |>
+  fmt_number(decimals = 2) |>
+  cols_label(
+    model = "Model",
+    min = "Minimum",
+    mean = "Mean",
+    median = "Median",
+    max = "Maximum"
+  ) |>
+  tab_spanner(
+    label = "Time (seconds)",
+    columns = min:max
+  )
+```

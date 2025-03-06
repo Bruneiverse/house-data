@@ -1,0 +1,151 @@
+---
+title: Missing Data Patterns
+author: Haziq Jamil
+page-layout: full
+grid:
+  sidebar-width: 0px
+editor_options: 
+  chunk_output_type: console
+html-table-processing: none
+---
+
+## Load data 
+
+```{r}
+#| echo: true
+#| eval: true 
+#| file: data.R
+```
+
+## Missing data patterns
+
+Let's take a look at the missing data patterns in the housing data.
+For simplicity, we focus on the year 2024 and houses in the Brunei-Muara district.
+
+```{r}
+hsp24 <- 
+  hsp |>
+  filter(year(date) == 2024, district == "Brunei-Muara") |>
+  select(price, mukim, plot_area, floor_area, beds, baths)
+glimpse(hsp24)
+```
+
+There are a total of `r nrow(hsp24)` houses in the Brunei-Muara district in 2024.
+There are a couple of missing values in the data set, `r sum(is.na(hsp24))` to be exact.
+We can visualise this using the `{mice}` and `{ggmice}` package.
+
+```{r}
+library(mice)
+library(ggmice)
+```
+
+Let's take a look at the missing data patterns in the housing data.
+
+```{r}
+plot_pattern(hsp24, square = !TRUE, rotate = !TRUE) 
+```
+
+We first note that in this instance, there are no missing values for price and spatial location.
+However, there is a pattern in the missing data, so the missingness mechanism is not *completely* at random. 
+It seems to be the case that the missing data is *at random* (MAR), which means that the missing data is dependent on the observed data.
+We can test this using a logistic regression.
+
+```{r}
+hsp24 |>
+  mutate(across(everything(), is.na)) |>
+  glm(formula = beds ~ plot_area + floor_area + baths, family = binomial) |>
+  summary()
+```
+
+What we can see is that the `beds` variable missingness is dependent on the `bath` missingness, which means that if the number of bathrooms is missing, the number of bedrooms is also likely to be missing (odds ratio increases by $e^{8.52} = `r round(exp(8.52), 1)`$).
+
+On the other hand, the missingness of the `floor_area` variable does not seem to be dependent on the other variables, which means that this variable is missing *completely* at random (MCAR).
+
+```{r}
+hsp24 |>
+  mutate(across(everything(), is.na)) |>
+  glm(formula = floor_area ~ plot_area + beds + baths, family = binomial) |>
+  summary()
+```
+
+Let's visualise the missing points as a scatter plot.
+
+```{r}
+ggmice(hsp24, aes(y = price / 1000, x = floor_area)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "black") +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(y = "Price (BND 1,000)", x = "Floor area (sq. ft.)")
+```
+
+
+## Simulating missingness mechanism
+
+Suppose we have a full data set and we want to simulate a missingness mechanism.
+For this purpose, we have the following data sets:
+
+1. DATA SET A: The original data set containing missing values.
+2. DATA SET B: The "complete cases" data set, i.e. subsetting DATA SET A containing no missing values whatsoever.
+
+Suppose we want to induce missingness in B with the same pattern as A.
+Here's the code to do it:
+
+```{r}
+set.seed(123)
+datA <- hsp24
+datB <- drop_na(hsp24)
+
+# Step 1: Calculate the proportion of missing values for each variable in the original data
+pat <-
+  mice::md.pattern(datA, plot = FALSE) |>
+  as.data.frame() |>
+  rownames_to_column(var = "freq") |>
+  select(-V7) |>
+  slice_head(n = -1) |>
+  unite("pattern", beds:floor_area, sep = "", remove = FALSE) |>
+  mutate(
+    freq = as.numeric(freq),
+    prop = freq / sum(freq),
+    id = row_number()
+  ) |> 
+  as_tibble()
+pat
+
+# Step 2: Randomly sample from this multinomial distribution
+mis <- sample(x = pat$pattern, size = nrow(datB), prob = pat$prop, replace = TRUE)
+# Check that it matches the original pattern
+round(prop.table(table(mis)), 3)
+rev(round(pat$prop, 3))
+
+# Step 3: Introduce missing values into the complete dataset based on these proportions
+for (i in 1:nrow(datB)) {
+  na_flags <- as.integer(strsplit(mis[i], "")[[1]]) == 0L
+  datB[, c("beds", "baths", "plot_area", "floor_area")][i, na_flags] <- NA
+}
+```
+
+Let's visualise the missing data patterns in the simulated data set.
+
+```{r}
+plot_pattern(datB, square = !TRUE, rotate = !TRUE) 
+```
+
+Some patterns are there, but some are not. This is expected when some of the missing patterns are rare.
+
+## Main article
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-missing-pattern
+#| fig-cap: Missing data patterns for key house characteristics.
+#| out-width: 100%
+#| fig-width: 9
+#| fig-height: 4
+hsp |>
+  dplyr::select(price, plot_area, floor_area, beds, baths) |>
+  plot_pattern(npat = 16) +
+  coord_flip() +
+  theme(aspect.ratio = 0.3)
+```
