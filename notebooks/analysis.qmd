@@ -184,7 +184,7 @@ hsp |>
     )
   ) |>
   tab_footnote(
-    footnote = paste0("Of Brunei’s 39 mukims, only 27 are considered transactable—excluding water villages and remote, non-developable areas."),
+    footnote = paste0("Of Brunei’s 39 mukims, only 27 are considered transactable--excluding water villages and remote, non-developable areas."),
     locations = cells_column_labels(columns = spatial)
   ) |>
   tab_footnote(

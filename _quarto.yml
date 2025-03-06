@@ -20,13 +20,13 @@ format:
     other-links:
       - text: Brunei House Price Data
         icon: database
-        href: data/hspbn_2024-03-03.csv  
+        href: data/hspbn_2025-03-03.csv  
       - text: BDCB RPPI
         icon: database
         href: data/rppi.csv
       - text: Brunei Spatial Area Data
         icon: database
-        href: https://github.com/Bruneiverse/bruneimap/blob/main/datasrc/bn_kpg_level_data.csv
+        href: https://raw.githubusercontent.com/Bruneiverse/bruneimap/refs/heads/main/inst/extdata/bn_kpg_level_data.csv
   docx: 
     reference-doc: data-in-brief-article-template.docx
     output-file: jamil2025archives

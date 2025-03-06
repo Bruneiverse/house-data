@@ -540,10 +540,11 @@ The mean absolute error (MAE) between the two indices is calculated to be `{r} s
 
 To test the accuracy of the LLM data extraction, we created a test data set of 100 house advertisements in the style of the web scraped data.
 Several popular models from Ollama were used, namely the Llama3.2 (3B), Mistral (7B), Phi 4 (14B), and DeepSeek-R1 distilled reasoning models based on Llama (8B) and Qwen (14B).
-Additionally, two models from OpenAI were included for comparison. 
+For the locally run Ollama models, the settings were set to the default values, with the exception of a lowered temperature setting: `temperature = 0.1`, `top-p=0.9` (nucleus sampling), `top-k=40` (top-k sampling), `max-tokens=128`, and `repeat-penalty=1.1`.
+Additionally, two models from OpenAI were included for comparison.
 These were the GPT-4o and the o1-mini, with the latter being a reasoning model.
 
-OpenAI's models topped the accuracy charts, with the o1-mini and gpt-40 models achieving the accuracy scores of 99.2% and 98.9% respectively.
+OpenAI's models topped the accuracy charts, with the o1-mini and gpt-4o models achieving the accuracy scores of 99.2% and 98.9% respectively.
 The reasoning model deepseek-r1:14b was the best performing locally run model, scoring 96.9% accuracy.
 Evidently, the smaller the model, the less accurate the extraction process (cf. llama3.2 70.8%).
 Most inaccuracies occurred in the `status` variable, where models struggled to parse the correct build status from vague advertisement descriptions.
