@@ -15,6 +15,13 @@ $for(by-author)$
 $if(by-author.note.text)$\fntext[fn$by-author.note.number$]{$by-author.note.text$}$endif$
 $endfor$
         
+% Add manuscript URL
+$if(manuscript-url)$
+\makeatletter
+\def\@elsuads{\url{$manuscript-url$}}
+\makeatother
+$endif$
+
 $if(abstract)$
 \begin{abstract}
 $abstract$
