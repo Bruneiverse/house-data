@@ -50,6 +50,7 @@ keywords:
   - Spatial Data
   - Web Scraping
   - Large Language Models
+manuscript-url: https://bruneiverse.github.io/house-data
 editor_options: 
   chunk_output_type: console
 ---
@@ -67,6 +68,17 @@ max(years) - min(years) + 1
 ```
 
 <!-- > Data articles describe research data that the authors have made publicly available through a repository. These articles ensure that raw data, which is often buried in supplementary material, is peer-reviewed, curated, formatted, indexed, given a DOI and made publicly available upon publication. All data articles must link to a repository that stores data produced and owned by either the author or the author's institution. Since data articles are templated, we require that you complete and submit the template. Data in Brief will not accept any submissions that contain data sets with insufficient variables or samples. -->
+
+::: {.content-visible when-format="pdf"}
+
+# Citation
+
+For attribution, please cite this work as:
+
+> H. Jamil, A.B. Noorosmawie, H.W. Rabu, L. Abdul Razak, From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam, Data in Brief (2025). <https://doi.org/10.1016/j.dib.2025.111505>.
+
+:::
+
 
 # Value of the Data
 
