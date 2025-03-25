@@ -17,6 +17,7 @@ manuscript:
 
 format:
   html: 
+    number-sections: true
     other-links:
       - text: Brunei House Price Data
         icon: database
@@ -27,9 +28,9 @@ format:
       - text: Brunei Spatial Area Data
         icon: database
         href: https://raw.githubusercontent.com/Bruneiverse/bruneimap/refs/heads/main/inst/extdata/bn_kpg_level_data.csv
-  docx: 
-    reference-doc: data-in-brief-article-template.docx
-    output-file: jamil2025archives
+  # docx: 
+  #   reference-doc: data-in-brief-article-template.docx
+  #   output-file: jamil2025archives
   elsevier-pdf:
     keep-tex: false    
     output-file: jamil2025archives
@@ -57,8 +58,8 @@ engine: knitr
 
 citation: 
   type: article-journal
-  issued: 2025
-  container-title: "Manuscript in Submission"
-  url: https://github.com/Bruneiverse/house-data
+  doi: '10.1016/j.dib.2025.111505'
+  container-title: 'Data in Brief'
+  note: 'In Press'
 google-scholar: true
 

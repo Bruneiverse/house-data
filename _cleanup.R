@@ -38,8 +38,6 @@ if (file.exists(html_file)) {
 }
 
 # Copy over the docx manuscript
-source_file <- "_submission/Revision 1/article_rev1.docx"
-destination_file <- "_manuscript/jamil2025archives.docx"
-
-# Copy the file, replacing the destination if it exists
-file.copy(source_file, destination_file, overwrite = TRUE)
+# source_file <- "_submission/Revision 1/article_rev1.docx"
+# destination_file <- "_manuscript/jamil2025archives.docx"
+# file.copy(source_file, destination_file, overwrite = TRUE)
