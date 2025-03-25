@@ -10,19 +10,21 @@
 This repository contains the source code and data to produce the Data in Brief article entitled "From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam".
 For attribution, please cite this work as:
 
-> H. Jamil, A. Barizah Noorosmawie, H. Waezz Rabu, L. Abdul Razak, From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam, *Manuscript in Submission* (2025). https://github.com/Bruneiverse/house-data.
+> H. Jamil, A.B. Noorosmawie, H.W. Rabu, L. Abdul Razak, From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam, Data in Brief (2025). https://doi.org/10.1016/j.dib.2025.111505.
 
 BibTeX citation:
 
 ```latex
 @article{jamil2025archives,
-  author = {Jamil, Haziq and Barizah Noorosmawie, Amira and Waezz Rabu,
-    Hafeezul and Abdul Razak, Lutfi},
+  author = {Jamil, Haziq and Noorosmawie, Amira Barizah and Rabu,
+    Hafeezul Waezz and Abdul Razak, Lutfi},
   title = {From {Archives} to {AI:} {Residential} {Property} {Data}
     {Across} {Three} {Decades} in {Brunei} {Darussalam}},
-  journal = {Manuscript in Submission},
-  date = {2025},
-  url = {https://github.com/Bruneiverse/house-data},
+  journal = {Data in Brief},
+  date = {2025-03-23},
+  url = {https://bruneiverse.github.io/house-data/},
+  doi = {10.1016/j.dib.2025.111505},
+  note = {In Press},
   langid = {en},
   abstract = {This article introduces the first publicly available data
     set for analysing the Brunei housing market, covering more than
@@ -35,7 +37,7 @@ BibTeX citation:
     addressing the limitations of restricted access to raw RPPI data and
     its relatively short timeline since its inception in 2015. Data
     collection involved manual transcription from archival sources and
-    automated web scraping using programmatic methods, supported by
+    automated web scraping using programmatic techniques, supported by
     innovative processing with Large Language Models (LLMs) to codify
     unstructured text. The data set enables spatial and temporal
     analysis, with potential applications in economics, urban planning,
